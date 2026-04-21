@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BrightMind Next.js Demo
 
-## Getting Started
+Demo website built with Next.js App Router, localStorage-based auth/roles, blog management, reviews, Google login via Firebase, and contact mail support.
 
-First, run the development server:
+## Local setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create your local env file:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Fill `.env.local` with:
+- Gmail SMTP credentials for the contact form
+- Firebase Web App credentials for Google login
+
+4. Start the project:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Required values:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+CONTACT_RECEIVER_EMAIL=
 
-## Learn More
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+```
 
-To learn more about Next.js, take a look at the following resources:
+Notes:
+- `.env.local` is ignored by git and should not be committed.
+- `NEXT_PUBLIC_*` variables are safe to expose to the browser, but SMTP secrets are not.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Git quick start
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If this repo has no remote yet:
 
-## Deploy on Vercel
+```bash
+git init
+git add .
+git commit -m "Prepare BrightMind demo for deployment"
+git branch -M main
+git remote add origin <your-github-repo-url>
+git push -u origin main
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If git is already initialized:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+git add .
+git commit -m "Prepare BrightMind demo for deployment"
+git push
+```
+
+## Deploy to Vercel
+
+Recommended flow:
+
+1. Push the project to GitHub.
+2. Go to Vercel and choose `Add New Project`.
+3. Import the GitHub repository.
+4. In `Environment Variables`, add every variable from `.env.local`.
+5. Deploy.
+
+Project settings for Vercel:
+- Framework preset: `Next.js`
+- Build command: `next build`
+- Output setting: leave default
+
+Important:
+- Add the production domain to Firebase Authentication `Authorized domains`.
+- If Google login works locally but fails on Vercel, this is usually the missing step.
+
+## Current verification
+
+- `npm run lint` passes
+- Production build could not be fully verified in this environment because `next build` ends with a local `spawn EPERM` process error after TypeScript starts
