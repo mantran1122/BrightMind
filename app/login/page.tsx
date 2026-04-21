@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider, isFirebaseConfigured } from "@/lib/firebase-client";
-import { getUsers, saveUsers, setCurrentUser, type StoredUser } from "@/lib/local-auth";
+import { loginWithGoogleProfile, loginWithPassword } from "@/lib/client-api";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,33 +32,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const users = getUsers();
-    const user = users.find(
-      (item) => item.email === normalizedEmail && item.password === password
-    );
-
-    if (!user) {
-      setError("Email hoac mat khau khong dung.");
-      return;
+    try {
+      const user = await loginWithPassword(email, password);
+      window.dispatchEvent(new Event("auth-changed"));
+      const targetPath = user.role === "admin" ? "/admin" : "/";
+      window.location.replace(targetPath);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Dang nhap that bai.");
     }
-
-    if (user.isLocked) {
-      setError("Tai khoan cua ban da bi khoa. Vui long lien he admin.");
-      return;
-    }
-
-    setCurrentUser({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isLocked: user.isLocked,
-    });
-    router.push("/");
   };
 
   const handleGoogleLogin = async () => {
@@ -81,33 +64,13 @@ export default function LoginPage() {
         return;
       }
 
-      const users = getUsers();
-      const existedUser = users.find((user) => user.email === googleEmail);
-      const role = existedUser?.role ?? "user";
-      const isLocked = existedUser?.isLocked ?? false;
       const name =
         result.user.displayName?.trim() ||
-        existedUser?.name ||
         googleEmail.split("@")[0];
-
-      if (isLocked) {
-        setError("Tai khoan cua ban da bi khoa. Vui long lien he admin.");
-        return;
-      }
-
-      if (!existedUser) {
-        const newUser: StoredUser = {
-          name,
-          email: googleEmail,
-          password: "google-oauth",
-          role,
-          isLocked,
-        };
-        saveUsers([...users, newUser]);
-      }
-
-      setCurrentUser({ name, email: googleEmail, role, isLocked });
-      router.push(role === "admin" ? "/admin" : "/");
+      const user = await loginWithGoogleProfile(name, googleEmail);
+      window.dispatchEvent(new Event("auth-changed"));
+      const targetPath = user.role === "admin" ? "/admin" : "/";
+      window.location.replace(targetPath);
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
         setError(getGoogleLoginErrorMessage(error.code));

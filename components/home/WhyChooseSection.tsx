@@ -73,7 +73,7 @@ export default function Section5() {
               href="/about"
               className="inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
             >
-              Learn More
+              Learn More Of Courses
             </Link>
           </div>
         </div>

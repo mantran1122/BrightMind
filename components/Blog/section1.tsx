@@ -10,8 +10,14 @@ import {
   useState,
 } from "react";
 import { ArrowUpRight, PenSquare } from "lucide-react";
-import { BlogPost, getBlogPosts, saveBlogPosts } from "@/lib/blog-data";
-import { getCurrentUser, type SessionUser } from "@/lib/local-auth";
+import { type BlogPost } from "@/lib/blog-data";
+import {
+  createNewBlogPost,
+  fetchBlogPosts,
+  fetchSessionUser,
+  saveBlogPostChanges,
+} from "@/lib/client-api";
+import { type SessionUser } from "@/lib/local-auth";
 
 type BlogFormValues = {
   category: string;
@@ -83,10 +89,8 @@ function formatToday() {
 
 function BlogCard({
   blog,
-  onOpenDetail,
 }: {
   blog: BlogPost;
-  onOpenDetail: (post: BlogPost) => void;
 }) {
   const isLongTitle = blog.title.length > 80;
   const isLongDescription = blog.description.length > 160;
@@ -114,13 +118,12 @@ function BlogCard({
             isLongTitle ? "line-clamp-3" : ""
           }`}
         >
-          <button
-            type="button"
-            onClick={() => onOpenDetail(blog)}
+          <Link
+            href={`/blog/${blog.id}`}
             className="text-left transition hover:text-[#8b6cff]"
           >
             {blog.title}
-          </button>
+          </Link>
         </h3>
 
         <p
@@ -132,24 +135,22 @@ function BlogCard({
         </p>
 
         {isLongTitle || isLongDescription ? (
-          <button
-            type="button"
-            onClick={() => onOpenDetail(blog)}
+          <Link
+            href={`/blog/${blog.id}`}
             className="mt-2 text-sm font-medium text-[#8b6cff] transition hover:opacity-80"
           >
             ... Read more
-          </button>
+          </Link>
         ) : null}
 
         <div className="mt-6 border-t border-black/10 pt-5">
-          <button
-            type="button"
-            onClick={() => onOpenDetail(blog)}
+          <Link
+            href={`/blog/${blog.id}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#0b0b1f] transition hover:text-[#8b6cff]"
           >
             Read More
             <ArrowUpRight className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
       </div>
     </article>
@@ -168,49 +169,28 @@ export default function Section2BlogGrid() {
     Partial<Record<keyof BlogFormValues, boolean>>
   >({});
   const [submitMessage, setSubmitMessage] = useState("");
-  const [posts, setPosts] = useState<BlogPost[]>(() => getBlogPosts());
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const formSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setCurrentUser(getCurrentUser());
+    const syncData = async () => {
+      const [sessionUser, blogPosts] = await Promise.all([
+        fetchSessionUser(),
+        fetchBlogPosts(),
+      ]);
+
+      setCurrentUser(sessionUser);
+      setPosts(blogPosts);
       setIsHydrated(true);
-    }, 0);
-
-    const syncCurrentUser = () => {
-      setCurrentUser(getCurrentUser());
     };
 
-    window.addEventListener("auth-changed", syncCurrentUser);
+    void syncData();
+    window.addEventListener("auth-changed", syncData);
+    window.addEventListener("blog-data-changed", syncData);
 
     return () => {
-      window.clearTimeout(timerId);
-      window.removeEventListener("auth-changed", syncCurrentUser);
-    };
-  }, []);
-
-  useEffect(() => {
-    const syncPosts = () => {
-      setPosts(getBlogPosts());
-    };
-
-    window.addEventListener("blog-data-changed", syncPosts);
-    return () => {
-      window.removeEventListener("blog-data-changed", syncPosts);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedPost(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("auth-changed", syncData);
+      window.removeEventListener("blog-data-changed", syncData);
     };
   }, []);
 
@@ -239,12 +219,6 @@ export default function Section2BlogGrid() {
   );
   const canWriteBlog =
     currentUser?.role === "admin" || currentUser?.role === "staff";
-  const canEditSelectedPost = Boolean(
-    selectedPost &&
-      currentUser &&
-      canWriteBlog &&
-      currentUser.email === selectedPost.authorEmail,
-  );
 
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -303,26 +277,7 @@ export default function Section2BlogGrid() {
     setIsFormOpen(true);
   };
 
-  const handleStartEdit = (post: BlogPost) => {
-    if (!currentUser || !canWriteBlog || currentUser.email !== post.authorEmail) {
-      return;
-    }
-
-    setValues({
-      category: post.category,
-      title: post.title,
-      description: post.description,
-      image: post.image,
-    });
-    setErrors({});
-    setTouchedFields({});
-    setSubmitMessage("");
-    setEditingPostId(post.id);
-    setIsFormOpen(true);
-    setSelectedPost(null);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!currentUser) {
@@ -364,37 +319,33 @@ export default function Section2BlogGrid() {
       image: values.image.trim(),
     };
 
-    const nextPosts = editingPostId
-      ? posts.map((post) =>
-          post.id === editingPostId && post.authorEmail === currentUser.email
-            ? {
-                ...post,
-                ...trimmedValues,
-              }
-            : post,
-        )
-      : [
-          {
-            id: crypto.randomUUID(),
-            authorEmail: currentUser.email,
-            isDeleted: false,
-            deletedAt: null,
-            date: formatToday(),
+    try {
+      const post = editingPostId
+        ? await saveBlogPostChanges(editingPostId, trimmedValues)
+        : await createNewBlogPost({
             ...trimmedValues,
-          },
-          ...posts,
-        ];
+            date: formatToday(),
+          });
 
-    setPosts(nextPosts);
-    setShowAllPosts(false);
-    saveBlogPosts(nextPosts);
-    resetFormState();
-    setSubmitMessage(
-      editingPostId
-        ? "Your blog post has been updated."
-        : "Your blog post has been added to the grid.",
-    );
-    setIsFormOpen(false);
+      setPosts((currentPosts) =>
+        editingPostId
+          ? currentPosts.map((item) => (item.id === post.id ? post : item))
+          : [post, ...currentPosts],
+      );
+      setShowAllPosts(false);
+      resetFormState();
+      setSubmitMessage(
+        editingPostId
+          ? "Your blog post has been updated."
+          : "Your blog post has been added to the grid.",
+      );
+      setIsFormOpen(false);
+      window.dispatchEvent(new Event("blog-data-changed"));
+    } catch (error) {
+      setSubmitMessage(
+        error instanceof Error ? error.message : "Unable to save blog post.",
+      );
+    }
   };
 
   const getFieldClassName = (fieldName: keyof BlogFormValues) =>
@@ -564,7 +515,7 @@ export default function Section2BlogGrid() {
 
         <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visiblePosts.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} onOpenDetail={setSelectedPost} />
+            <BlogCard key={blog.id} blog={blog} />
           ))}
         </div>
 
@@ -581,74 +532,6 @@ export default function Section2BlogGrid() {
         ) : null}
       </div>
 
-      {selectedPost ? (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 px-4 py-8"
-          onClick={() => setSelectedPost(null)}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3 text-sm">
-                <span className="rounded-full bg-[#f3f0ff] px-3 py-1.5 font-medium text-[#8b6cff]">
-                  {selectedPost.category}
-                </span>
-                <span className="text-gray-500">{selectedPost.date}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedPost(null)}
-                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-              >
-                Close
-              </button>
-            </div>
-
-            <h3 className="mt-5 text-3xl font-bold leading-tight text-[#0b0b1f] md:text-4xl">
-              {selectedPost.title}
-            </h3>
-
-            <div className="mt-6 overflow-hidden rounded-2xl">
-              <img
-                src={selectedPost.image}
-                alt={selectedPost.title}
-                className="h-[240px] w-full object-cover md:h-[360px]"
-              />
-            </div>
-
-            <p className="mt-6 text-base leading-8 text-gray-700 md:text-lg md:leading-9">
-              {selectedPost.description}
-            </p>
-
-            <div className="mt-6 flex items-center gap-3">
-              {canEditSelectedPost ? (
-                <button
-                  type="button"
-                  onClick={() => handleStartEdit(selectedPost)}
-                  className="inline-flex rounded-lg border border-[#8b6cff] px-5 py-2.5 text-sm font-medium text-[#8b6cff] transition hover:bg-[#f3f0ff]"
-                >
-                  Edit post
-                </button>
-              ) : null}
-              <Link
-                href={`/blog/${selectedPost.id}`}
-                className="inline-flex rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
-              >
-                Open full page
-              </Link>
-              <button
-                type="button"
-                onClick={() => setSelectedPost(null)}
-                className="inline-flex rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 }

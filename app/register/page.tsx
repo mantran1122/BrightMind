@@ -1,61 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import {
-  getUsers,
-  saveUsers,
-  setCurrentUser,
-  type StoredUser,
-  type UserRole,
-} from "@/lib/local-auth";
+import { registerWithPassword } from "@/lib/client-api";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("user");
   const [error, setError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const trimmedName = name.trim();
-
-    if (password !== confirmPassword) {
-      setError("Mat khau nhap lai khong khop.");
-      return;
+    try {
+      await registerWithPassword(name, email, password, confirmPassword);
+      window.dispatchEvent(new Event("auth-changed"));
+      window.location.replace("/");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Dang ky that bai.");
     }
-
-    const users = getUsers();
-    const alreadyExists = users.some((user) => user.email === normalizedEmail);
-
-    if (alreadyExists) {
-      setError("Email da ton tai. Vui long dang nhap.");
-      return;
-    }
-
-    const newUser: StoredUser = {
-      name: trimmedName,
-      email: normalizedEmail,
-      password,
-      role,
-      isLocked: false,
-    };
-
-    saveUsers([...users, newUser]);
-    setCurrentUser({
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      isLocked: newUser.isLocked,
-    });
-    router.push("/");
   };
 
   return (
@@ -90,20 +56,6 @@ export default function RegisterPage() {
               onChange={(event) => setEmail(event.target.value)}
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-black"
             />
-          </div>
-
-          <div>
-            <label htmlFor="role" className="mb-1 block text-sm font-medium text-gray-700">
-              Role (demo)
-            </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(event) => setRole(event.target.value as UserRole)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-black outline-none transition focus:border-black"
-            >
-              <option value="user">User</option>
-            </select>
           </div>
 
           <div>

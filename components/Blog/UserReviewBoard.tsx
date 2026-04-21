@@ -10,8 +10,14 @@ import {
   useState,
 } from "react";
 import { ChevronLeft, ChevronRight, MessageSquarePlus, Star } from "lucide-react";
-import { getReviews, ReviewPost, saveReviews } from "@/lib/blog-data";
-import { getCurrentUser, type SessionUser } from "@/lib/local-auth";
+import { type ReviewPost } from "@/lib/blog-data";
+import {
+  createNewReview,
+  fetchReviews,
+  fetchSessionUser,
+  saveReviewChanges,
+} from "@/lib/client-api";
+import { type SessionUser } from "@/lib/local-auth";
 
 type ReviewFormValues = {
   name: string;
@@ -82,38 +88,31 @@ export default function UserReviewBoard() {
   const [touchedFields, setTouchedFields] = useState<
     Partial<Record<keyof ReviewFormValues, boolean>>
   >({});
-  const [reviews, setReviews] = useState<ReviewPost[]>(() => getReviews());
+  const [reviews, setReviews] = useState<ReviewPost[]>([]);
   const [submitMessage, setSubmitMessage] = useState("");
   const [expandedReviewId, setExpandedReviewId] = useState<string | null>(null);
   const formSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setCurrentUser(getCurrentUser());
-      setIsHydrated(true);
-    }, 0);
+    const syncData = async () => {
+      const [sessionUser, nextReviews] = await Promise.all([
+        fetchSessionUser(),
+        fetchReviews(),
+      ]);
 
-    const syncCurrentUser = () => {
-      setCurrentUser(getCurrentUser());
-    };
-
-    window.addEventListener("auth-changed", syncCurrentUser);
-
-    return () => {
-      window.clearTimeout(timerId);
-      window.removeEventListener("auth-changed", syncCurrentUser);
-    };
-  }, []);
-
-  useEffect(() => {
-    const syncReviews = () => {
-      setReviews(getReviews());
+      setCurrentUser(sessionUser);
+      setReviews(nextReviews);
       setActiveIndex(0);
+      setIsHydrated(true);
     };
 
-    window.addEventListener("blog-data-changed", syncReviews);
+    void syncData();
+    window.addEventListener("auth-changed", syncData);
+    window.addEventListener("blog-data-changed", syncData);
+
     return () => {
-      window.removeEventListener("blog-data-changed", syncReviews);
+      window.removeEventListener("auth-changed", syncData);
+      window.removeEventListener("blog-data-changed", syncData);
     };
   }, []);
 
@@ -203,7 +202,7 @@ export default function UserReviewBoard() {
     setIsFormOpen(true);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!currentUser) {
@@ -244,38 +243,44 @@ export default function UserReviewBoard() {
       rating: values.rating,
     };
 
-    const nextReviews = editingReviewId
-      ? reviews.map((review) =>
-          review.id === editingReviewId && review.email === currentUser.email
-            ? {
-                ...review,
-                ...trimmedValues,
-              }
-            : review,
-        )
-      : [
-          {
-            ...trimmedValues,
-            isDeleted: false,
-            deletedAt: null,
-            id: crypto.randomUUID(),
-            createdAt: new Date().toISOString(),
-          },
-          ...reviews,
-        ];
+    try {
+      const review = editingReviewId
+        ? await saveReviewChanges(editingReviewId, {
+            name: trimmedValues.name,
+            course: trimmedValues.course,
+            title: trimmedValues.title,
+            content: trimmedValues.content,
+            rating: trimmedValues.rating,
+          })
+        : await createNewReview({
+            name: trimmedValues.name,
+            course: trimmedValues.course,
+            title: trimmedValues.title,
+            content: trimmedValues.content,
+            rating: trimmedValues.rating,
+          });
 
-    setReviews(nextReviews);
-    if (!editingReviewId) {
-      setActiveIndex(0);
+      setReviews((currentReviews) =>
+        editingReviewId
+          ? currentReviews.map((item) => (item.id === review.id ? review : item))
+          : [review, ...currentReviews],
+      );
+      if (!editingReviewId) {
+        setActiveIndex(0);
+      }
+      resetFormState();
+      setSubmitMessage(
+        editingReviewId
+          ? "Your review has been updated."
+          : "Your review has been published.",
+      );
+      setIsFormOpen(false);
+      window.dispatchEvent(new Event("blog-data-changed"));
+    } catch (error) {
+      setSubmitMessage(
+        error instanceof Error ? error.message : "Unable to save review.",
+      );
     }
-    saveReviews(nextReviews);
-    resetFormState();
-    setSubmitMessage(
-      editingReviewId
-        ? "Your review has been updated."
-        : "Your review has been published.",
-    );
-    setIsFormOpen(false);
   };
 
   const getFieldClassName = (fieldName: keyof ReviewFormValues) =>

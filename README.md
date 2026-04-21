@@ -44,6 +44,12 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+
+MYSQL_HOST=
+MYSQL_PORT=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_DATABASE=
 ```
 
 Notes:
@@ -89,6 +95,33 @@ Project settings for Vercel:
 Important:
 - Add the production domain to Firebase Authentication `Authorized domains`.
 - If Google login works locally but fails on Vercel, this is usually the missing step.
+
+## MySQL with XAMPP
+
+Default local config for XAMPP:
+
+```env
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=brightmind_db
+```
+
+Quick setup:
+
+1. Start `Apache` and `MySQL` in XAMPP.
+2. Restart `npm run dev`.
+3. Open `http://localhost:3000/api/db-setup` with a `POST` request once to create `brightmind_db` and the required table automatically.
+4. Open `http://localhost:3000/api/db-test` to verify the connection.
+
+Optional manual setup:
+- You can still import [database/brightmind_db.sql](D:\PV\test2\database\brightmind_db.sql:1) in phpMyAdmin if you prefer creating it manually.
+
+Current usage:
+- Contact form submissions are saved to MySQL when the MySQL env vars are configured.
+- The contact API still sends email through SMTP as before.
+- Full schema now includes `users`, `blog_posts`, `reviews`, `auth_sessions`, and `contact_messages`.
 
 ## Current verification
 

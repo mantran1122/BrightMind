@@ -177,6 +177,8 @@ export default function CardCarouselSection({
             <button
               type="button"
               onClick={handlePrev}
+              aria-label="Previous cards"
+              title="Previous cards"
               className="flex h-12 w-12 items-center justify-center rounded-full border border-[#8b6cff] bg-white text-[#8b6cff] shadow-sm transition hover:bg-[#8b6cff] hover:text-white"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -185,6 +187,8 @@ export default function CardCarouselSection({
             <button
               type="button"
               onClick={handleNext}
+              aria-label="Next cards"
+              title="Next cards"
               className="flex h-12 w-12 items-center justify-center rounded-full bg-[#8b6cff] text-white shadow-sm transition hover:opacity-90"
             >
               <ArrowRight className="h-5 w-5" />

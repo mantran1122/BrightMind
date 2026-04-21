@@ -31,7 +31,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#f5f5f5] pt-16">
+    <footer className="bg-[#f3f4f6] pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_0.7fr_0.6fr_0.8fr]">
           <div>
@@ -65,7 +65,7 @@ export default function Footer() {
 
             <Link
               href="/contact"
-              className="mt-10 inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-7 py-4 text-base font-semibold text-white transition hover:opacity-90"
+              className="mt-10 inline-flex items-center justify-center rounded-full bg-[#5b3df5] px-7 py-4 text-base font-semibold text-white transition hover:bg-[#4c31db]"
             >
               Contact Us
             </Link>
@@ -138,7 +138,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 border-t border-gray-300 py-5 text-center text-sm text-gray-500">
+        <div className="mt-14 border-t border-gray-300 py-5 text-center text-sm text-gray-700">
           © 2026 BrightMind. All rights reserved.
         </div>
       </div>

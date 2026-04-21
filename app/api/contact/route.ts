@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import { isMysqlConfigured, saveContactMessage } from "@/lib/mysql";
 
 type ContactPayload = {
   name: string;
@@ -69,6 +70,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: validationError }, { status: 400 });
     }
 
+    const cleanedPayload = {
+      name: payload.name?.trim() ?? "",
+      email: payload.email?.trim() ?? "",
+      phone: payload.phone?.trim() ?? "",
+      date: payload.date?.trim() ?? "",
+      message: payload.message?.trim() ?? "",
+    };
+
+    if (isMysqlConfigured()) {
+      await saveContactMessage(cleanedPayload);
+    }
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
@@ -84,30 +97,34 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: `"BrightMind Contact Form" <${process.env.SMTP_USER}>`,
       to: receiverEmail,
-      replyTo: payload.email?.trim(),
-      subject: `New contact request from ${payload.name?.trim()}`,
+      replyTo: cleanedPayload.email,
+      subject: `New contact request from ${cleanedPayload.name}`,
       text: [
-        `Parent name: ${payload.name?.trim()}`,
-        `Parent email: ${payload.email?.trim()}`,
-        `Phone number: ${payload.phone?.trim()}`,
-        `Child date of birth: ${payload.date?.trim()}`,
+        `Parent name: ${cleanedPayload.name}`,
+        `Parent email: ${cleanedPayload.email}`,
+        `Phone number: ${cleanedPayload.phone}`,
+        `Child date of birth: ${cleanedPayload.date}`,
         "",
         "Message:",
-        payload.message?.trim() ?? "",
+        cleanedPayload.message,
       ].join("\n"),
       html: `
         <h2>New contact request</h2>
-        <p><strong>Parent name:</strong> ${payload.name?.trim()}</p>
-        <p><strong>Parent email:</strong> ${payload.email?.trim()}</p>
-        <p><strong>Phone number:</strong> ${payload.phone?.trim()}</p>
-        <p><strong>Child date of birth:</strong> ${payload.date?.trim()}</p>
+        <p><strong>Parent name:</strong> ${cleanedPayload.name}</p>
+        <p><strong>Parent email:</strong> ${cleanedPayload.email}</p>
+        <p><strong>Phone number:</strong> ${cleanedPayload.phone}</p>
+        <p><strong>Child date of birth:</strong> ${cleanedPayload.date}</p>
         <p><strong>Message:</strong></p>
-        <p>${(payload.message?.trim() ?? "").replace(/\n/g, "<br />")}</p>
+        <p>${cleanedPayload.message.replace(/\n/g, "<br />")}</p>
       `,
     });
 
     return NextResponse.json(
-      { message: "Your message has been sent successfully." },
+      {
+        message: isMysqlConfigured()
+          ? "Your message has been saved to MySQL and sent successfully."
+          : "Your message has been sent successfully.",
+      },
       { status: 200 },
     );
   } catch (error) {

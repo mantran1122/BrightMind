@@ -1,3 +1,4 @@
+'use client'; 
 import Link from "next/link";
 
 export default function HeroSection() {
@@ -41,9 +42,17 @@ export default function HeroSection() {
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/courses"
-                className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                className="inline-flex items-center justify-center rounded-full bg-[#5b3df5] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#4c31db]"
               >
                 Explore Courses
+              </Link>
+
+              <Link
+                href="/about"
+                className="inline-flex items-center justify-center rounded-full border border-black px-6 py-3 text-sm font-semibold text-[#0b0b1f] transition hover:bg-white"
+                aria-label="Learn more about BrightMind's mission and programs"
+              >
+                Learn More About Us
               </Link>
 
               <Link
@@ -88,7 +97,7 @@ export default function HeroSection() {
                 />
               </div>
 
-              <h3 className="text-2xl font-bold text-[#0b0b1f]">40+</h3>
+              <p className="text-2xl font-bold text-[#0b0b1f]">40+</p>
               <p className="mt-2 text-xl font-semibold leading-8 text-[#0b0b1f]">
                 Professional Teachers
               </p>
