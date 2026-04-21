@@ -3,9 +3,6 @@ import { ensureMysqlSetup, listBlogPosts } from "@/lib/mysql";
 import { getAbsoluteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  await ensureMysqlSetup();
-  const posts = await listBlogPosts();
-
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: getAbsoluteUrl("/"),
@@ -34,11 +31,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: getAbsoluteUrl(`/blog/${post.id}`),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  try {
+    await ensureMysqlSetup();
+    const posts = await listBlogPosts();
 
-  return [...staticRoutes, ...blogRoutes];
+    const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
+      url: getAbsoluteUrl(`/blog/${post.id}`),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+
+    return [...staticRoutes, ...blogRoutes];
+  } catch (error) {
+    console.error("Sitemap DB error:", error);
+    return staticRoutes;
+  }
 }
