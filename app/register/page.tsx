@@ -1,26 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { registerWithPassword } from "@/lib/client-api";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
     try {
       await registerWithPassword(name, email, password, confirmPassword);
       window.dispatchEvent(new Event("auth-changed"));
-      window.location.replace("/");
+      router.replace("/");
+      router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "Dang ky that bai.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -37,6 +44,7 @@ export default function RegisterPage() {
             <input
               id="name"
               type="text"
+              disabled={isSubmitting}
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -51,6 +59,7 @@ export default function RegisterPage() {
             <input
               id="email"
               type="email"
+              disabled={isSubmitting}
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -68,6 +77,7 @@ export default function RegisterPage() {
             <input
               id="password"
               type="password"
+              disabled={isSubmitting}
               minLength={6}
               required
               value={password}
@@ -86,6 +96,7 @@ export default function RegisterPage() {
             <input
               id="confirmPassword"
               type="password"
+              disabled={isSubmitting}
               minLength={6}
               required
               value={confirmPassword}
@@ -98,11 +109,17 @@ export default function RegisterPage() {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
           >
-            Register
+            {isSubmitting ? "Creating account..." : "Register"}
           </button>
         </form>
+        {isSubmitting ? (
+          <p className="mt-3 text-center text-sm text-gray-600" role="status" aria-live="polite">
+            Dang tao tai khoan...
+          </p>
+        ) : null}
 
         <p className="mt-6 text-sm text-gray-600">
           Đã có tài khoản?{" "}

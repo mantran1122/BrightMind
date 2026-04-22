@@ -6,6 +6,7 @@ type JsonResult<T> = Promise<T>;
 async function requestJson<T>(input: RequestInfo, init?: RequestInit): JsonResult<T> {
   const response = await fetch(input, {
     ...init,
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),

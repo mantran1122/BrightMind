@@ -20,10 +20,17 @@ export default function Header() {
   const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthSyncing, setIsAuthSyncing] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const syncAuthState = async () => {
-      setCurrentUser(await fetchSessionUser());
+      setIsAuthSyncing(true);
+      try {
+        setCurrentUser(await fetchSessionUser());
+      } finally {
+        setIsAuthSyncing(false);
+      }
     };
 
     void syncAuthState();
@@ -40,6 +47,18 @@ export default function Header() {
     currentUser?.role === "admin"
       ? [...navItems, { label: "Admin", href: "/admin" }]
       : navItems;
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+      setCurrentUser(null);
+      window.dispatchEvent(new Event("auth-changed"));
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white">
@@ -76,20 +95,20 @@ export default function Header() {
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
-            {currentUser ? (
+            {isAuthSyncing ? (
+              <div className="h-10 w-40 animate-pulse rounded-full bg-gray-200" />
+            ) : currentUser ? (
               <>
                 <span className="text-sm font-medium text-gray-700">
                   Hi, {currentUser.name} ({currentUser.role})
                 </span>
                 <button
                   type="button"
-                  onClick={async () => {
-                    await logoutUser();
-                    window.dispatchEvent(new Event("auth-changed"));
-                  }}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
                 >
-                  Logout
+                  {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
               </>
             ) : (
@@ -143,7 +162,9 @@ export default function Header() {
             </nav>
 
             <div className="mt-4 border-t border-gray-200 pt-4">
-              {currentUser ? (
+              {isAuthSyncing ? (
+                <div className="h-10 w-full animate-pulse rounded-2xl bg-gray-200" />
+              ) : currentUser ? (
                 <div className="space-y-3">
                   <div className="rounded-2xl bg-gray-50 px-4 py-3">
                     <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>
@@ -154,13 +175,13 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={async () => {
-                      await logoutUser();
-                      window.dispatchEvent(new Event("auth-changed"));
+                      await handleLogout();
                       setIsMobileMenuOpen(false);
                     }}
+                    disabled={isLoggingOut}
                     className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
                   >
-                    Logout
+                    {isLoggingOut ? "Logging out..." : "Logout"}
                   </button>
                 </div>
               ) : (

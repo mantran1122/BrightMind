@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { signInWithPopup } from "firebase/auth";
@@ -8,10 +9,13 @@ import { auth, googleProvider, isFirebaseConfigured } from "@/lib/firebase-clien
 import { loginWithGoogleProfile, loginWithPassword } from "@/lib/client-api";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const isSubmitting = isPasswordLoading || isGoogleLoading;
 
   const getGoogleLoginErrorMessage = (errorCode: string) => {
     switch (errorCode) {
@@ -35,14 +39,18 @@ export default function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setIsPasswordLoading(true);
 
     try {
       const user = await loginWithPassword(email, password);
       window.dispatchEvent(new Event("auth-changed"));
       const targetPath = user.role === "admin" ? "/admin" : "/";
-      window.location.replace(targetPath);
+      router.replace(targetPath);
+      router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "Dang nhap that bai.");
+    } finally {
+      setIsPasswordLoading(false);
     }
   };
 
@@ -70,7 +78,8 @@ export default function LoginPage() {
       const user = await loginWithGoogleProfile(name, googleEmail);
       window.dispatchEvent(new Event("auth-changed"));
       const targetPath = user.role === "admin" ? "/admin" : "/";
-      window.location.replace(targetPath);
+      router.replace(targetPath);
+      router.refresh();
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
         setError(getGoogleLoginErrorMessage(error.code));
@@ -95,6 +104,7 @@ export default function LoginPage() {
             <input
               id="email"
               type="email"
+              disabled={isSubmitting}
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -112,6 +122,7 @@ export default function LoginPage() {
             <input
               id="password"
               type="password"
+              disabled={isSubmitting}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -123,16 +134,17 @@ export default function LoginPage() {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-full  rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
           >
-            Login
+            {isPasswordLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
-          disabled={isGoogleLoading}
+          disabled={isSubmitting}
           className="mt-3 flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-800 shadow-md transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <svg
@@ -162,6 +174,11 @@ export default function LoginPage() {
             {isGoogleLoading ? "Dang dang nhap Google..." : "Continue with Google"}
           </span>
         </button>
+        {isSubmitting ? (
+          <p className="mt-3 text-center text-sm text-gray-600" role="status" aria-live="polite">
+            Dang xu ly dang nhap...
+          </p>
+        ) : null}
 
         <p className="mt-6 text-sm text-gray-600">
           Chưa có tài khoản?{" "}
