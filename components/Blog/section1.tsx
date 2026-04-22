@@ -94,6 +94,8 @@ function BlogCard({
 }) {
   const isLongTitle = blog.title.length > 80;
   const isLongDescription = blog.description.length > 160;
+  const descriptiveTitle =
+    blog.title.length > 70 ? `${blog.title.slice(0, 67)}...` : blog.title;
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
@@ -139,7 +141,7 @@ function BlogCard({
             href={`/blog/${blog.id}`}
             className="mt-2 text-sm font-medium text-[#8b6cff] transition hover:opacity-80"
           >
-            ... Read more
+            Continue reading: {descriptiveTitle}
           </Link>
         ) : null}
 
@@ -148,8 +150,8 @@ function BlogCard({
             href={`/blog/${blog.id}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#0b0b1f] transition hover:text-[#8b6cff]"
           >
-            Read More
-            <ArrowUpRight className="h-4 w-4" />
+            Read more about {descriptiveTitle}
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
       </div>
