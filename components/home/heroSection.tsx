@@ -113,11 +113,11 @@ export default function HeroSection() {
 
             <div className="rounded-[20px] bg-[#76dbc5] p-5 md:p-6">
               <p className="text-lg font-semibold leading-8 text-[#0b0b1f]">
-                â€œBelieve in yourself,
+                Believe in yourself,
                 <br />
                 keep learning, and
                 <br />
-                success will follow.â€
+                success will follow.
               </p>
               <p className="mt-5 text-base font-medium text-[#0b0b1f]">
                 Mathew S.

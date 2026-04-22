@@ -18,7 +18,7 @@ export default function Section4Journey() {
           </p>
 
           <h2 className="mt-3 text-3xl font-bold leading-tight text-[#0b0b1f] md:text-4xl lg:text-5xl">
-            Inspiring Journey of BrightMindâ€™s Growth
+            Inspiring Journey of BrightMind Growth
           </h2>
 
           <p className="mt-5 max-w-xl text-base leading-7 text-gray-600">

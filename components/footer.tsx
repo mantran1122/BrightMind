@@ -129,9 +129,9 @@ export default function Footer() {
                   rel="noreferrer"
                   className="transition hover:text-[#16a34a]"
                 >
-                  168 Nguyá»…n VÄƒn Cá»« Ná»‘i DÃ i 
+                  168 Nguyen Van Cu Noi Dai
                   <br />
-                  An BÃ¬nh, Cáº§n ThÆ¡, Viá»‡t Nam
+                  An Binh, Can Tho, Viet Nam
                 </a>
               </p>
             </div>
@@ -139,7 +139,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 border-t border-gray-300 py-5 text-center text-sm text-gray-700">
-          Â© 2026 BrightMind. All rights reserved.
+          © 2026 BrightMind. All rights reserved.
         </div>
       </div>
     </footer>

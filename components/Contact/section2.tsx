@@ -15,7 +15,7 @@ const contactItems = [
   {
     title: "Visit our office",
     description: "Visit us for scheduling",
-    value: "168 Nguyá»…n VÄƒn Cá»« Ná»‘i DÃ i, An BÃ¬nh, Cáº§n ThÆ¡, Viá»‡t Nam",
+    value: "168 Nguyen Van Cu Noi Dai, An Binh, Can Tho, Viet Nam",
     href: "https://maps.app.goo.gl/4V5ctMrPKCooaWSD7",
     icon: MapPin,
     bg: "bg-[#f3e3df]",
@@ -244,12 +244,6 @@ export default function Section2ContactForm() {
               Send us a Message
             </h2>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[#444]">
-              Connect instantly and clearly with your audience anytime,
-              anywhere, effortlessly. Would you like alternative versions or a
-              different tone?
-            </p>
-
             <form
               noValidate
               onSubmit={handleSubmit}
@@ -470,4 +464,3 @@ export default function Section2ContactForm() {
     </section>
   );
 }
-
