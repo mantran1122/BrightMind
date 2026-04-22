@@ -119,10 +119,51 @@ export function isMysqlConfigured() {
   );
 }
 
+function shouldUseMysqlSsl() {
+  const sslMode = (process.env.MYSQL_SSL_MODE ?? "").trim().toLowerCase();
+  const host = (process.env.MYSQL_HOST ?? "").trim().toLowerCase();
+  const isTidbCloudHost = host.includes("tidbcloud.com");
+
+  if (isTidbCloudHost && ["0", "false", "disable", "disabled"].includes(sslMode)) {
+    throw new Error(
+      "TiDB Cloud requires TLS connection. Remove MYSQL_SSL_MODE=disable or set MYSQL_SSL_MODE=require.",
+    );
+  }
+
+  if (["1", "true", "require", "required"].includes(sslMode)) {
+    return true;
+  }
+
+  if (["0", "false", "disable", "disabled"].includes(sslMode)) {
+    return false;
+  }
+
+  return isTidbCloudHost;
+}
+
+function getMysqlSslOptions() {
+  if (!shouldUseMysqlSsl()) {
+    return undefined;
+  }
+
+  const rejectUnauthorizedEnv = (process.env.MYSQL_SSL_REJECT_UNAUTHORIZED ?? "true")
+    .trim()
+    .toLowerCase();
+  const rejectUnauthorized = !["0", "false", "no"].includes(rejectUnauthorizedEnv);
+
+  const ca = process.env.MYSQL_SSL_CA?.replace(/\\n/g, "\n");
+
+  return ca
+    ? { minVersion: "TLSv1.2", rejectUnauthorized, ca }
+    : { minVersion: "TLSv1.2", rejectUnauthorized };
+}
+
 export function getMysqlPool() {
   if (global.__brightmindMysqlPool) {
     return global.__brightmindMysqlPool;
   }
+
+  const ssl = getMysqlSslOptions();
 
   const pool = mysql.createPool({
     host: getRequiredEnv("MYSQL_HOST"),
@@ -132,6 +173,7 @@ export function getMysqlPool() {
     database: getRequiredEnv("MYSQL_DATABASE"),
     waitForConnections: true,
     connectionLimit: 10,
+    ...(ssl ? { ssl } : {}),
   });
 
   global.__brightmindMysqlPool = pool;
@@ -143,6 +185,8 @@ function getMysqlServerPool() {
     return global.__brightmindMysqlServerPool;
   }
 
+  const ssl = getMysqlSslOptions();
+
   const pool = mysql.createPool({
     host: getRequiredEnv("MYSQL_HOST"),
     port: Number(process.env.MYSQL_PORT ?? 3306),
@@ -150,6 +194,7 @@ function getMysqlServerPool() {
     password: process.env.MYSQL_PASSWORD ?? "",
     waitForConnections: true,
     connectionLimit: 5,
+    ...(ssl ? { ssl } : {}),
   });
 
   global.__brightmindMysqlServerPool = pool;
