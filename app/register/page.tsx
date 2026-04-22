@@ -115,11 +115,6 @@ export default function RegisterPage() {
             {isSubmitting ? "Creating account..." : "Register"}
           </button>
         </form>
-        {isSubmitting ? (
-          <p className="mt-3 text-center text-sm text-gray-600" role="status" aria-live="polite">
-            Dang tao tai khoan...
-          </p>
-        ) : null}
 
         <p className="mt-6 text-sm text-gray-600">
           Đã có tài khoản?{" "}

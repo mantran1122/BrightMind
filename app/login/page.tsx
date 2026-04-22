@@ -174,11 +174,6 @@ export default function LoginPage() {
             {isGoogleLoading ? "Dang dang nhap Google..." : "Continue with Google"}
           </span>
         </button>
-        {isSubmitting ? (
-          <p className="mt-3 text-center text-sm text-gray-600" role="status" aria-live="polite">
-            Dang xu ly dang nhap...
-          </p>
-        ) : null}
 
         <p className="mt-6 text-sm text-gray-600">
           Chưa có tài khoản?{" "}
