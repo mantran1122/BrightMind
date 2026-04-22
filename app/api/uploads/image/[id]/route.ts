@@ -13,7 +13,9 @@ export async function GET(_: Request, context: RouteContext) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  return new NextResponse(image.fileData, {
+  const body = Uint8Array.from(image.fileData).buffer;
+
+  return new NextResponse(body, {
     status: 200,
     headers: {
       "Content-Type": image.mimeType,
