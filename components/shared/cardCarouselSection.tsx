@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -179,7 +179,7 @@ export default function CardCarouselSection({
               onClick={handlePrev}
               aria-label="Previous cards"
               title="Previous cards"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#8b6cff] bg-white text-[#8b6cff] shadow-sm transition hover:bg-[#8b6cff] hover:text-white"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#16a34a] bg-white text-[#16a34a] shadow-sm transition hover:bg-[#16a34a] hover:text-white"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -189,7 +189,7 @@ export default function CardCarouselSection({
               onClick={handleNext}
               aria-label="Next cards"
               title="Next cards"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#8b6cff] text-white shadow-sm transition hover:opacity-90"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#16a34a] text-white shadow-sm transition hover:opacity-90"
             >
               <ArrowRight className="h-5 w-5" />
             </button>
@@ -199,3 +199,4 @@ export default function CardCarouselSection({
     </section>
   );
 }
+

@@ -15,6 +15,7 @@ const navItems = [
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
+const LOGO_SRC = "/logo-v2.png";
 
 export default function Header() {
   const pathname = usePathname();
@@ -66,7 +67,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/logo.png"
+              src={LOGO_SRC}
               alt="BrightMind logo"
               width={320}
               height={180}

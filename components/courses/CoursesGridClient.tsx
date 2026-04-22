@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -41,8 +41,8 @@ export default function CoursesGridClient({ courses }: Props) {
 
               <div className="p-6">
                 <div className="flex items-center justify-between gap-4">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-[#f3f0ff] px-3 py-1.5 text-sm font-medium text-[#8b6cff]">
-                    <Star className="h-4 w-4 fill-[#8b6cff] text-[#8b6cff]" />
+                  <div className="inline-flex items-center gap-2 rounded-full bg-[#e9f9ef] px-3 py-1.5 text-sm font-medium text-[#16a34a]">
+                    <Star className="h-4 w-4 fill-[#16a34a] text-[#16a34a]" />
                     {course.rating}
                   </div>
 
@@ -52,7 +52,7 @@ export default function CoursesGridClient({ courses }: Props) {
                 </div>
 
                 <h3 className="mt-5 text-2xl font-bold leading-8 text-[#0b0b1f]">
-                  <Link href={`/courses/${course.id}`} className="transition hover:text-[#8b6cff]">
+                  <Link href={`/courses/${course.id}`} className="transition hover:text-[#16a34a]">
                     {course.title}
                   </Link>
                 </h3>
@@ -78,7 +78,7 @@ export default function CoursesGridClient({ courses }: Props) {
 
                   <Link
                     href={`/courses/${course.id}`}
-                    className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                    className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
                   >
                     Enroll Now
                   </Link>
@@ -113,3 +113,4 @@ export default function CoursesGridClient({ courses }: Props) {
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-import { Users, BadgeDollarSign, BookOpen, Sparkles } from "lucide-react";
+﻿import { Users, BadgeDollarSign, BookOpen, Sparkles } from "lucide-react";
 
 const values = [
   {
@@ -46,7 +46,7 @@ export default function Section3CoreValues() {
                 key={item.title}
                 className="rounded-[28px] border border-gray-200 bg-[#f8f8f8] p-7 transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8b6cff] text-white">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#16a34a] text-white">
                   <Icon className="h-6 w-6" />
                 </div>
 

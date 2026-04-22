@@ -10,17 +10,29 @@ const authRoutes = new Set(["/login", "/register"]);
 export default function SiteFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = authRoutes.has(pathname);
+  const isAdminPage = pathname.startsWith("/admin");
 
   if (isAuthPage) {
-    return <>{children}</>;
+    return <div className="site-warm min-h-screen">{children}</div>;
+  }
+
+  if (isAdminPage) {
+    return (
+      <>
+        <Header />
+        {children}
+        <Footer />
+        <BackToTopButton />
+      </>
+    );
   }
 
   return (
-    <>
+    <div className="site-warm min-h-screen">
       <Header />
       {children}
       <Footer />
       <BackToTopButton />
-    </>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebookF,
@@ -41,7 +41,7 @@ export default function Footer() {
                 className="h-6 w-6 text-[#0b0b1f]"
               />
               <h2 className="text-[20px] font-bold text-[#0b0b1f]">
-                Bright<span className="text-[#8b6cff]">Mind</span>
+                Bright<span className="text-[#16a34a]">Mind</span>
               </h2>
             </Link>
 
@@ -56,7 +56,7 @@ export default function Footer() {
                   key={item.label}
                   href={item.href}
                   aria-label={item.label}
-                  className="text-[#0b0b1f] transition hover:text-[#8b6cff]"
+                  className="text-[#0b0b1f] transition hover:text-[#16a34a]"
                 >
                   <FontAwesomeIcon icon={item.icon} className="h-5 w-5" />
                 </Link>
@@ -78,7 +78,7 @@ export default function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="text-[18px] text-[#0b0b1f] transition hover:text-[#8b6cff]"
+                    className="text-[18px] text-[#0b0b1f] transition hover:text-[#16a34a]"
                   >
                     {item.label}
                   </Link>
@@ -94,7 +94,7 @@ export default function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="text-[18px] text-[#0b0b1f] transition hover:text-[#8b6cff]"
+                    className="text-[18px] text-[#0b0b1f] transition hover:text-[#16a34a]"
                   >
                     {item.label}
                   </Link>
@@ -109,7 +109,7 @@ export default function Footer() {
               <p>
                 <a
                   href="tel:+621829017"
-                  className="transition hover:text-[#8b6cff]"
+                  className="transition hover:text-[#16a34a]"
                 >
                   +(62) 1829017
                 </a>
@@ -117,7 +117,7 @@ export default function Footer() {
               <p>
                 <a
                   href="mailto:meme@brightmind.com"
-                  className="transition hover:text-[#8b6cff]"
+                  className="transition hover:text-[#16a34a]"
                 >
                   meme@brightmind.com
                 </a>
@@ -127,11 +127,11 @@ export default function Footer() {
                   href="https://maps.app.goo.gl/4V5ctMrPKCooaWSD7"
                   target="_blank"
                   rel="noreferrer"
-                  className="transition hover:text-[#8b6cff]"
+                  className="transition hover:text-[#16a34a]"
                 >
-                  168 Nguyễn Văn Cừ Nối Dài 
+                  168 Nguyá»…n VÄƒn Cá»« Ná»‘i DÃ i 
                   <br />
-                  An Bình, Cần Thơ, Việt Nam
+                  An BÃ¬nh, Cáº§n ThÆ¡, Viá»‡t Nam
                 </a>
               </p>
             </div>
@@ -139,9 +139,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 border-t border-gray-300 py-5 text-center text-sm text-gray-700">
-          © 2026 BrightMind. All rights reserved.
+          Â© 2026 BrightMind. All rights reserved.
         </div>
       </div>
     </footer>
   );
 }
+

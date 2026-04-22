@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -231,7 +231,7 @@ function SectionCard({
 
 function SummaryStatCard({ label, value, tone }: SummaryCard) {
   const toneStyles = {
-    blue: "bg-[#2a3151] text-[#6c72ff] border-[#4148a5]",
+    blue: "bg-[#1f3a2f] text-[#4ade80] border-[#2e7d57]",
     emerald: "bg-[#233746] text-[#18d6a3] border-[#1d6f69]",
     amber: "bg-[#30313d] text-[#ffb21e] border-[#8d6b1a]",
     rose: "bg-[#35293a] text-[#ff5b88] border-[#7f3954]",
@@ -246,7 +246,7 @@ function SummaryStatCard({ label, value, tone }: SummaryCard) {
 }
 
 function getRoleBadge(role: UserRole) {
-  if (role === "admin") return "bg-[#2c315f] text-[#7d82ff]";
+  if (role === "admin") return "bg-[#1f3b2a] text-[#86efac]";
   if (role === "staff") return "bg-[#21354d] text-[#5eb8ff]";
   return "bg-[#384760] text-slate-200";
 }
@@ -601,11 +601,11 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#151f35] px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-5">
-        <header className="rounded-[28px] border border-[#2c3a56] bg-[#141f35] px-6 py-6 text-white shadow-[0_20px_50px_rgba(5,10,20,0.28)] sm:px-8">
+        <header className="rounded-[28px] border border-[#2c3a56] bg-[#141f35] px-4 py-6 text-white shadow-[0_20px_50px_rgba(5,10,20,0.28)] sm:px-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
               <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[#34415a] bg-[#1f2a43]">
-                <LayoutGrid className="h-6 w-6 text-[#6f73ff]" />
+                <LayoutGrid className="h-6 w-6 text-[#22c55e]" />
               </span>
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
@@ -642,8 +642,8 @@ export default function AdminPage() {
           </div>
         </header>
 
-        <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="rounded-[28px] bg-transparent p-2">
+        <div className="grid items-start gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="min-w-0 rounded-[28px] bg-transparent p-2">
             <p className="px-3 pb-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
               Menu
             </p>
@@ -659,14 +659,14 @@ export default function AdminPage() {
                     onClick={() => setActiveTab(item.key)}
                     className={`flex w-full items-start gap-3 rounded-2xl px-4 py-4 text-left transition ${
                       isActive
-                        ? "border-l-2 border-[#6f73ff] bg-[#2a3251] text-white"
+                        ? "border-l-2 border-[#22c55e] bg-[#204033] text-white"
                         : "text-slate-300 hover:bg-[#202b43]"
                     }`}
                   >
                     <span
                       className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
                         isActive
-                          ? "bg-[#6f73ff] text-white shadow-[0_10px_24px_rgba(111,115,255,0.35)]"
+                          ? "bg-[#22c55e] text-white shadow-[0_10px_24px_rgba(34,197,94,0.35)]"
                           : "bg-[#32405a] text-slate-200"
                       }`}
                     >
@@ -688,11 +688,11 @@ export default function AdminPage() {
             </nav>
           </aside>
 
-          <section className="space-y-5">
+          <section className="min-w-0 space-y-5">
             <div className="rounded-[28px] bg-[#202c44] p-5 shadow-[0_18px_40px_rgba(5,10,20,0.22)] sm:p-6">
               <div className="flex flex-col gap-5">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#6f73ff]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#22c55e]">
                     {activeTabConfig.label}
                   </p>
                   <h2 className="mt-2 text-2xl font-semibold text-white">
@@ -719,24 +719,24 @@ export default function AdminPage() {
                 description="Nhung thong tin can quan tam cho tai khoan nguoi dung."
               >
                 {users.length > 0 ? (
-                  <div className="overflow-hidden rounded-[24px] border border-[#2c3a56]">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full">
+                  <div className="rounded-[24px] border border-[#2c3a56]">
+                    <div className="overflow-x-auto pb-2 touch-pan-x">
+                      <table className="min-w-[760px] w-full">
                         <thead className="bg-[#1b263d]">
                           <tr className="text-left">
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Name
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Email
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Role
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Status
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Actions
                             </th>
                           </tr>
@@ -750,7 +750,7 @@ export default function AdminPage() {
                                 <td className="px-5 py-4">
                                   <p className="font-semibold text-white">{user.name}</p>
                                   {isMe ? (
-                                    <span className="mt-2 inline-flex rounded-full bg-[#2c315f] px-2.5 py-1 text-xs font-semibold text-[#7d82ff]">
+                                    <span className="mt-2 inline-flex rounded-full bg-[#1f3b2a] px-2.5 py-1 text-xs font-semibold text-[#86efac]">
                                       Current account
                                     </span>
                                   ) : null}
@@ -773,7 +773,7 @@ export default function AdminPage() {
                                           event.target.value as UserRole,
                                         )
                                       }
-                                      className="rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#6f73ff]"
+                                      className="rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-[#22c55e]"
                                     >
                                       <option value="user">user</option>
                                       <option value="staff">staff</option>
@@ -840,24 +840,24 @@ export default function AdminPage() {
                 description="Tat ca bai viet hien thi duoc gom vao mot bang de de quan sat."
               >
                 {activePosts.length > 0 ? (
-                  <div className="overflow-hidden rounded-[24px] border border-[#2c3a56]">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full">
+                  <div className="rounded-[24px] border border-[#2c3a56]">
+                    <div className="overflow-x-auto pb-2 touch-pan-x">
+                      <table className="min-w-[760px] w-full">
                         <thead className="bg-[#1b263d]">
                           <tr className="text-left">
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Title
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Author
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Category
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Date
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Action
                             </th>
                           </tr>
@@ -875,7 +875,7 @@ export default function AdminPage() {
                                 {post.authorEmail}
                               </td>
                               <td className="px-5 py-4">
-                                <span className="inline-flex rounded-full bg-[#2c315f] px-2.5 py-1 text-xs font-semibold text-[#7d82ff]">
+                                <span className="inline-flex rounded-full bg-[#1f3b2a] px-2.5 py-1 text-xs font-semibold text-[#86efac]">
                                   {post.category}
                                 </span>
                               </td>
@@ -909,16 +909,16 @@ export default function AdminPage() {
                 title="Course management"
                 description="Them moi, cap nhat, va quan ly khoa hoc hien thi tren trang courses."
               >
-                <div className="overflow-hidden rounded-[24px] border border-[#2c3a56]">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full">
+                <div className="rounded-[24px] border border-[#2c3a56]">
+                  <div className="overflow-x-auto pb-2 touch-pan-x">
+                    <table className="min-w-[760px] w-full">
                       <thead className="bg-[#1b263d]">
                         <tr className="text-left">
-                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Title</th>
-                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Instructor</th>
-                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Level</th>
-                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Price</th>
-                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Action</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">Title</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">Instructor</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">Level</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">Price</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#2b3952] bg-[#202c44]">
@@ -971,7 +971,7 @@ export default function AdminPage() {
                         setCourseMessage("");
                         setIsCourseFormOpen((current) => !current);
                       }}
-                      className="rounded-xl bg-[#6f73ff] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                      className="rounded-xl bg-[#22c55e] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                     >
                       {isCourseFormOpen ? "Hide form" : "Add course"}
                     </button>
@@ -994,7 +994,7 @@ export default function AdminPage() {
                       <input
                         value={courseValues.title}
                         onChange={(event) => handleCourseField("title", event.target.value)}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1003,7 +1003,7 @@ export default function AdminPage() {
                         value={courseValues.rating}
                         onChange={(event) => handleCourseField("rating", event.target.value)}
                         placeholder="4.8"
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1012,7 +1012,7 @@ export default function AdminPage() {
                         value={courseValues.lessons}
                         onChange={(event) => handleCourseField("lessons", event.target.value)}
                         placeholder="40 lesson"
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1021,7 +1021,7 @@ export default function AdminPage() {
                         value={courseValues.duration}
                         onChange={(event) => handleCourseField("duration", event.target.value)}
                         placeholder="5h 30m"
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1030,7 +1030,7 @@ export default function AdminPage() {
                         value={courseValues.students}
                         onChange={(event) => handleCourseField("students", event.target.value)}
                         placeholder="500 students"
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1038,7 +1038,7 @@ export default function AdminPage() {
                       <input
                         value={courseValues.instructor}
                         onChange={(event) => handleCourseField("instructor", event.target.value)}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1051,7 +1051,7 @@ export default function AdminPage() {
                             event.target.value as CourseFormValues["currency"],
                           )
                         }
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       >
                         <option value="USD">USD</option>
                         <option value="VND">VND</option>
@@ -1067,7 +1067,7 @@ export default function AdminPage() {
                         value={courseValues.priceAmount}
                         onChange={(event) => handleCourseField("priceAmount", event.target.value)}
                         placeholder={courseValues.currency === "VND" ? "1000000" : "39.00"}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300">
@@ -1080,7 +1080,7 @@ export default function AdminPage() {
                             event.target.value as CourseFormValues["level"],
                           )
                         }
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       >
                         <option value="Beginner">Beginner</option>
                         <option value="Intermediate">Intermediate</option>
@@ -1094,16 +1094,16 @@ export default function AdminPage() {
                         accept="image/*"
                         onChange={handleCourseImageUpload}
                         disabled={isCourseImageUploading}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff] disabled:opacity-60"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e] disabled:opacity-60"
                       />
                       {isCourseImageUploading ? (
-                        <p className="mt-1 text-xs text-[#6f73ff]">Uploading image...</p>
+                        <p className="mt-1 text-xs text-[#22c55e]">Uploading image...</p>
                       ) : null}
                       <input
                         value={courseValues.image}
                         onChange={(event) => handleCourseField("image", event.target.value)}
                         placeholder="https://example.com/image.jpg or /api/uploads/image/{id}"
-                        className="mt-2 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-2 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300 sm:col-span-2">
@@ -1112,7 +1112,7 @@ export default function AdminPage() {
                         rows={3}
                         value={courseValues.description}
                         onChange={(event) => handleCourseField("description", event.target.value)}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <label className="text-xs text-slate-300 sm:col-span-2">
@@ -1121,7 +1121,7 @@ export default function AdminPage() {
                         rows={4}
                         value={courseValues.outcomes}
                         onChange={(event) => handleCourseField("outcomes", event.target.value)}
-                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#22c55e]"
                       />
                     </label>
                     <div className="sm:col-span-2 flex flex-wrap items-center justify-end gap-2">
@@ -1137,7 +1137,7 @@ export default function AdminPage() {
                       <button
                         type="submit"
                         disabled={isCourseImageUploading || isCourseSubmitting}
-                        className="rounded-xl bg-[#6f73ff] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                        className="rounded-xl bg-[#22c55e] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                       >
                         {isCourseSubmitting
                           ? "Saving..."
@@ -1157,24 +1157,24 @@ export default function AdminPage() {
                 description="Danh sach review duoc trinh bay gon hon de de xu ly."
               >
                 {activeReviews.length > 0 ? (
-                  <div className="overflow-hidden rounded-[24px] border border-[#2c3a56]">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full">
+                  <div className="rounded-[24px] border border-[#2c3a56]">
+                    <div className="overflow-x-auto pb-2 touch-pan-x">
+                      <table className="min-w-[760px] w-full">
                         <thead className="bg-[#1b263d]">
                           <tr className="text-left">
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Reviewer
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Course
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Rating
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Date
                             </th>
-                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">
+                            <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#22c55e]">
                               Action
                             </th>
                           </tr>
@@ -1359,3 +1359,4 @@ export default function AdminPage() {
     </main>
   );
 }
+

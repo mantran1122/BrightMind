@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Star } from "lucide-react";
@@ -118,7 +118,7 @@ export default function Section6() {
               What Learners
               <br />
               Saying About{" "}
-              <span className="text-[#8b6cff]">BrightMind</span>
+              <span className="text-[#16a34a]">BrightMind</span>
             </h2>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function Section6() {
               onClick={handlePrev}
               aria-label="Previous testimonials"
               title="Previous testimonials"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#8b6cff] bg-white text-[#8b6cff] shadow-sm transition hover:bg-[#8b6cff] hover:text-white"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-[#16a34a] bg-white text-[#16a34a] shadow-sm transition hover:bg-[#16a34a] hover:text-white"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -176,7 +176,7 @@ export default function Section6() {
               onClick={handleNext}
               aria-label="Next testimonials"
               title="Next testimonials"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#8b6cff] text-white shadow-sm transition hover:opacity-90"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#16a34a] text-white shadow-sm transition hover:opacity-90"
             >
               <ArrowRight className="h-5 w-5" />
             </button>
@@ -186,3 +186,4 @@ export default function Section6() {
     </section>
   );
 }
+

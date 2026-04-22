@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -287,7 +287,7 @@ export default function UserReviewBoard() {
     `mt-2 w-full rounded-[14px] border bg-white px-4 py-3 text-sm text-[#0b0b1f] outline-none transition ${
       errors[fieldName]
         ? "border-red-500 focus:border-red-500"
-        : "border-black/10 focus:border-[#8b6cff]"
+        : "border-black/10 focus:border-[#16a34a]"
     }`;
 
   const goToPrevious = () => {
@@ -337,7 +337,7 @@ export default function UserReviewBoard() {
         <div className="rounded-[32px] bg-white p-6 shadow-sm md:p-8 lg:p-10">
           <div className="flex flex-col gap-6 border-b border-black/10 pb-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b6cff]">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#16a34a]">
                 Community Reviews
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#0b0b1f] md:text-5xl">
@@ -351,7 +351,7 @@ export default function UserReviewBoard() {
               <button
                 type="button"
                 onClick={handleToggleForm}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
               >
                 <MessageSquarePlus className="h-4 w-4" />
                 {isFormOpen
@@ -375,7 +375,7 @@ export default function UserReviewBoard() {
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="rounded-full bg-[#f3f0ff] px-4 py-2 text-sm font-medium text-[#8b6cff]">
+                    <span className="rounded-full bg-[#e9f9ef] px-4 py-2 text-sm font-medium text-[#16a34a]">
                       {activeReview?.course ?? "No review"}
                     </span>
                     <span className="text-sm text-[#666]">
@@ -406,7 +406,7 @@ export default function UserReviewBoard() {
                     <button
                       type="button"
                       onClick={() => setExpandedReviewId(activeReview.id)}
-                      className="mt-2 text-sm font-medium text-[#8b6cff] transition hover:opacity-80"
+                      className="mt-2 text-sm font-medium text-[#16a34a] transition hover:opacity-80"
                     >
                       ... Read more
                     </button>
@@ -428,7 +428,7 @@ export default function UserReviewBoard() {
                     <button
                       type="button"
                       onClick={() => handleStartEdit(activeReview)}
-                      className="mt-4 inline-flex rounded-full border border-[#8b6cff] px-4 py-2 text-sm font-medium text-[#8b6cff] transition hover:bg-[#f3f0ff]"
+                      className="mt-4 inline-flex rounded-full border border-[#16a34a] px-4 py-2 text-sm font-medium text-[#16a34a] transition hover:bg-[#e9f9ef]"
                     >
                       Edit your review
                     </button>
@@ -459,7 +459,7 @@ export default function UserReviewBoard() {
                     onClick={goToPrevious}
                     disabled={sortedReviews.length === 0}
                     aria-label="Previous review"
-                    className="inline-flex h-12 min-w-[132px] items-center justify-between rounded-full border border-black/10 bg-white px-4 text-[#0b0b1f] transition hover:border-[#8b6cff] hover:text-[#8b6cff] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex h-12 min-w-[132px] items-center justify-between rounded-full border border-black/10 bg-white px-4 text-[#0b0b1f] transition hover:border-[#16a34a] hover:text-[#16a34a] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <ChevronLeft className="h-5 w-5" />
                     <span className="text-sm font-medium">Previous</span>
@@ -469,7 +469,7 @@ export default function UserReviewBoard() {
                     onClick={goToNext}
                     disabled={sortedReviews.length === 0}
                     aria-label="Next review"
-                    className="inline-flex h-12 min-w-[108px] items-center justify-between rounded-full border border-black/10 bg-white px-4 text-[#0b0b1f] transition hover:border-[#8b6cff] hover:text-[#8b6cff] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex h-12 min-w-[108px] items-center justify-between rounded-full border border-black/10 bg-white px-4 text-[#0b0b1f] transition hover:border-[#16a34a] hover:text-[#16a34a] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <span className="text-sm font-medium">Next</span>
                     <ChevronRight className="h-5 w-5" />
@@ -485,7 +485,7 @@ export default function UserReviewBoard() {
                       aria-label={`Go to review ${index + 1}`}
                       className={`h-2.5 rounded-full transition-all ${
                         index === activeIndex
-                          ? "w-10 bg-[#8b6cff]"
+                          ? "w-10 bg-[#16a34a]"
                           : "w-2.5 bg-black/15 hover:bg-black/30"
                       }`}
                     />
@@ -503,12 +503,12 @@ export default function UserReviewBoard() {
                     onClick={() => setActiveIndex(index)}
                     className={`w-[280px] shrink-0 rounded-[24px] border p-5 text-left transition ${
                       index === activeIndex
-                        ? "border-[#8b6cff] bg-white shadow-sm"
+                        ? "border-[#16a34a] bg-white shadow-sm"
                         : "border-black/10 bg-white/70 hover:bg-white"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-medium text-[#8b6cff]">{review.course}</p>
+                      <p className="text-sm font-medium text-[#16a34a]">{review.course}</p>
                       <span className="text-sm text-[#666]">
                         {formatReviewDate(review.createdAt)}
                       </span>
@@ -534,7 +534,7 @@ export default function UserReviewBoard() {
               className="mt-8 rounded-[28px] bg-[#f8f6ff] p-6 md:p-8"
             >
               <div className="max-w-3xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b6cff]">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#16a34a]">
                   {editingReviewId ? "Edit Your Review" : "Publish Your Review"}
                 </p>
                 <h3 className="mt-3 text-3xl font-bold text-[#0b0b1f]">
@@ -675,3 +675,4 @@ export default function UserReviewBoard() {
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -111,7 +111,7 @@ function BlogCard({
 
       <div className="p-6">
         <div className="flex items-center gap-3 text-sm">
-          <span className="rounded-full bg-[#f3f0ff] px-3 py-1.5 font-medium text-[#8b6cff]">
+          <span className="rounded-full bg-[#e9f9ef] px-3 py-1.5 font-medium text-[#16a34a]">
             {blog.category}
           </span>
           <span className="text-gray-500">{blog.date}</span>
@@ -124,7 +124,7 @@ function BlogCard({
         >
           <Link
             href={`/blog/${blog.id}`}
-            className="text-left transition hover:text-[#8b6cff]"
+            className="text-left transition hover:text-[#16a34a]"
           >
             {blog.title}
           </Link>
@@ -141,7 +141,7 @@ function BlogCard({
         {isLongTitle || isLongDescription ? (
           <Link
             href={`/blog/${blog.id}`}
-            className="mt-2 text-sm font-medium text-[#8b6cff] transition hover:opacity-80"
+            className="mt-2 text-sm font-medium text-[#16a34a] transition hover:opacity-80"
           >
             Continue reading: {descriptiveTitle}
           </Link>
@@ -150,7 +150,7 @@ function BlogCard({
         <div className="mt-6 border-t border-black/10 pt-5">
           <Link
             href={`/blog/${blog.id}`}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#0b0b1f] transition hover:text-[#8b6cff]"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#0b0b1f] transition hover:text-[#16a34a]"
           >
             Read more about {descriptiveTitle}
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -384,7 +384,7 @@ export default function Section2BlogGrid() {
     `mt-2 w-full rounded-[14px] border bg-white px-4 py-3 text-sm text-[#0b0b1f] outline-none transition ${
       errors[fieldName]
         ? "border-red-500 focus:border-red-500"
-        : "border-black/10 focus:border-[#8b6cff]"
+        : "border-black/10 focus:border-[#16a34a]"
     }`;
 
   return (
@@ -392,7 +392,7 @@ export default function Section2BlogGrid() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b6cff]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#16a34a]">
               Blog Posts
             </p>
             <h2 className="mt-3 text-3xl font-bold text-[#0b0b1f] md:text-5xl">
@@ -424,7 +424,7 @@ export default function Section2BlogGrid() {
             className="mt-8 rounded-[28px] bg-white p-6 shadow-sm md:p-8"
           >
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#8b6cff]">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#16a34a]">
                 {editingPostId ? "Edit Post" : "Post Writer"}
               </p>
               <h3 className="mt-3 text-3xl font-bold text-[#0b0b1f]">
@@ -473,10 +473,10 @@ export default function Section2BlogGrid() {
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={isImageUploading}
-                  className="mt-2 w-full rounded-[14px] border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff] disabled:opacity-60"
+                  className="mt-2 w-full rounded-[14px] border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#16a34a] disabled:opacity-60"
                 />
                 {isImageUploading ? (
-                  <p className="mt-2 text-xs text-[#8b6cff]">Uploading image...</p>
+                  <p className="mt-2 text-xs text-[#16a34a]">Uploading image...</p>
                 ) : null}
                 {errors.image ? (
                   <p className="mt-2 text-sm text-red-600">{errors.image}</p>
@@ -538,7 +538,7 @@ export default function Section2BlogGrid() {
                 <button
                   type="submit"
                   disabled={isImageUploading}
-                  className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
+                  className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
                 >
                   {editingPostId ? "Save Changes" : "Publish Post"}
                 </button>
@@ -569,3 +569,4 @@ export default function Section2BlogGrid() {
     </section>
   );
 }
+

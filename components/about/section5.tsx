@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Check } from "lucide-react";
 
 const features = [
@@ -40,7 +40,7 @@ export default function Section5WhyChoose() {
           <div className="mt-8 space-y-5">
             {features.map((item) => (
               <div key={item} className="flex items-start gap-4">
-                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#8b6cff] text-white">
+                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#16a34a] text-white">
                   <Check className="h-5 w-5" />
                 </div>
 
@@ -54,7 +54,7 @@ export default function Section5WhyChoose() {
           <div className="mt-8">
             <Link
               href="/courses"
-              className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
+              className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
             >
               Explore Courses
             </Link>

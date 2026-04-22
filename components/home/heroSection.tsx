@@ -1,4 +1,4 @@
-'use client'; 
+﻿'use client'; 
 import Link from "next/link";
 
 export default function HeroSection() {
@@ -31,7 +31,7 @@ export default function HeroSection() {
             <h1 className="text-4xl font-bold leading-tight text-[#0b0b1f] md:text-6xl lg:text-7xl">
               Learn and Grow with
               <br />
-              Top <span className="text-[#8b6cff]">Online Courses</span>
+              Top <span className="text-[#16a34a]">Online Courses</span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-gray-600 md:text-base">
@@ -113,11 +113,11 @@ export default function HeroSection() {
 
             <div className="rounded-[20px] bg-[#76dbc5] p-5 md:p-6">
               <p className="text-lg font-semibold leading-8 text-[#0b0b1f]">
-                “Believe in yourself,
+                â€œBelieve in yourself,
                 <br />
                 keep learning, and
                 <br />
-                success will follow.”
+                success will follow.â€
               </p>
               <p className="mt-5 text-base font-medium text-[#0b0b1f]">
                 Mathew S.
@@ -132,3 +132,4 @@ export default function HeroSection() {
     </section>
   );
 }
+

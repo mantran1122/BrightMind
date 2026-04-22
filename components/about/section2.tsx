@@ -1,4 +1,4 @@
-const stats = [
+﻿const stats = [
   {
     value: "100,000+",
     label: "Students Enrolled",
@@ -24,7 +24,7 @@ export default function Section2Stats() {
         <div className="grid grid-cols-2 gap-y-8 md:grid-cols-4 md:gap-6">
           {stats.map((item) => (
             <div key={item.label} className="text-center">
-              <h3 className="text-4xl font-bold tracking-tight text-[#8b6cff] md:text-5xl lg:text-6xl">
+              <h3 className="text-4xl font-bold tracking-tight text-[#16a34a] md:text-5xl lg:text-6xl">
                 {item.value}
               </h3>
 

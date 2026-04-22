@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
@@ -15,7 +15,7 @@ const contactItems = [
   {
     title: "Visit our office",
     description: "Visit us for scheduling",
-    value: "168 Nguyễn Văn Cừ Nối Dài, An Bình, Cần Thơ, Việt Nam",
+    value: "168 Nguyá»…n VÄƒn Cá»« Ná»‘i DÃ i, An BÃ¬nh, Cáº§n ThÆ¡, Viá»‡t Nam",
     href: "https://maps.app.goo.gl/4V5ctMrPKCooaWSD7",
     icon: MapPin,
     bg: "bg-[#f3e3df]",
@@ -141,7 +141,7 @@ export default function Section2ContactForm() {
     }
 
     if (fieldName === "name") {
-      nextValue = value.replace(/[^a-zA-ZÀ-ỹ\s'.-]/g, "");
+      nextValue = value.replace(/[^a-zA-ZÃ€-á»¹\s'.-]/g, "");
     }
 
     setValues((currentValues) => ({
@@ -232,7 +232,7 @@ export default function Section2ContactForm() {
     `${isTextarea ? textareaBaseClassName : inputBaseClassName} ${
       errors[fieldName]
         ? "border-red-500 focus:border-red-500"
-        : "border-black/20 focus:border-[#8b6cff]"
+        : "border-black/20 focus:border-[#16a34a]"
     }`;
 
   return (
@@ -404,7 +404,7 @@ export default function Section2ContactForm() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#8b6cff] text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-[#16a34a] text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSubmitting ? "Sending..." : "Submit"}
                 </button>
@@ -450,7 +450,7 @@ export default function Section2ContactForm() {
                       {item.href ? (
                         <a
                           href={item.href}
-                          className="mt-5 inline-block max-w-xs text-base font-medium leading-7 text-[#0b0b1f] transition hover:text-[#8b6cff]"
+                          className="mt-5 inline-block max-w-xs text-base font-medium leading-7 text-[#0b0b1f] transition hover:text-[#16a34a]"
                         >
                           {item.value}
                         </a>
@@ -470,3 +470,4 @@ export default function Section2ContactForm() {
     </section>
   );
 }
+

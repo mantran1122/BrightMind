@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Check } from "lucide-react";
 
 const features = [
@@ -18,7 +18,7 @@ export default function Section4Journey() {
           </p>
 
           <h2 className="mt-3 text-3xl font-bold leading-tight text-[#0b0b1f] md:text-4xl lg:text-5xl">
-            Inspiring Journey of BrightMind’s Growth
+            Inspiring Journey of BrightMindâ€™s Growth
           </h2>
 
           <p className="mt-5 max-w-xl text-base leading-7 text-gray-600">
@@ -30,7 +30,7 @@ export default function Section4Journey() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {features.map((item) => (
               <div key={item} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8b6cff] text-white">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#16a34a] text-white">
                   <Check className="h-4 w-4" />
                 </div>
 
@@ -44,7 +44,7 @@ export default function Section4Journey() {
           <div className="mt-8">
             <Link
               href="/courses"
-              className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
+              className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
             >
               Explore Courses
             </Link>

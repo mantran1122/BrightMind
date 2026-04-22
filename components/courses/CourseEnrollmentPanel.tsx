@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -135,7 +135,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
 
   return (
     <section className="rounded-[28px] border border-black/10 bg-white p-6 shadow-sm sm:p-8">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8b6cff]">
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#16a34a]">
         Enrollment
       </p>
       <h2 className="mt-3 text-3xl font-bold text-[#0b0b1f]">Ready to join this course?</h2>
@@ -149,7 +149,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
           type="button"
           onClick={openForm}
           disabled={isSyncingUser}
-          className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSyncingUser ? "Checking account..." : "Register this course"}
         </button>
@@ -185,7 +185,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
           <div className="w-full max-w-2xl rounded-[24px] bg-white p-5 shadow-2xl sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8b6cff]">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#16a34a]">
                   Course Registration
                 </p>
                 <h3 className="mt-2 text-2xl font-bold text-[#0b0b1f]">
@@ -242,7 +242,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
                   required
                   disabled={isSubmitting}
                   placeholder="0912345678"
-                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff]"
+                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#16a34a]"
                 />
               </div>
 
@@ -256,7 +256,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
                   onChange={(event) => handleChange("childName", event.target.value)}
                   required
                   disabled={isSubmitting}
-                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff]"
+                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#16a34a]"
                 />
               </div>
 
@@ -272,7 +272,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
                   onChange={(event) => handleChange("childBirthDate", event.target.value)}
                   required
                   disabled={isSubmitting}
-                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff]"
+                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#16a34a]"
                 />
               </div>
 
@@ -288,7 +288,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
                   required
                   disabled={isSubmitting}
                   placeholder="Share your preferred schedule or special requests."
-                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff]"
+                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#16a34a]"
                 />
               </div>
 
@@ -296,7 +296,7 @@ export default function CourseEnrollmentPanel({ course }: Props) {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? "Sending request..." : "Submit enrollment"}
                 </button>
@@ -308,3 +308,4 @@ export default function CourseEnrollmentPanel({ course }: Props) {
     </section>
   );
 }
+

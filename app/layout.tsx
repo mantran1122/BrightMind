@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
 
 config.autoAddCss = false;
+const META_LOGO_SRC = "/logo-v2.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     locale: siteConfig.locale,
     images: [
       {
-        url: "/logo.svg",
+        url: META_LOGO_SRC,
         alt: "BrightMind",
       },
     ],
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.defaultTitle,
     description: siteConfig.description,
-    images: ["/logo.svg"],
+    images: [META_LOGO_SRC],
   },
   robots: {
     index: true,

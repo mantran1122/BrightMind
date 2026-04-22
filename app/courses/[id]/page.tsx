@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CourseEnrollmentPanel from "@/components/courses/CourseEnrollmentPanel";
@@ -78,7 +78,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
             <div className="p-6 sm:p-8">
               <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="rounded-full bg-[#f3f0ff] px-3 py-1.5 font-medium text-[#8b6cff]">
+                <span className="rounded-full bg-[#e9f9ef] px-3 py-1.5 font-medium text-[#16a34a]">
                   {course.level}
                 </span>
                 <span className="text-gray-600">{course.lessons}</span>
@@ -92,15 +92,15 @@ export default async function CourseDetailPage({ params }: PageProps) {
 
               <p className="mt-4 text-base leading-8 text-gray-600">{course.description}</p>
 
-              <div className="mt-8 rounded-2xl border border-black/10 bg-[#faf9ff] p-5">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#8b6cff]">
+              <div className="mt-8 rounded-2xl border border-black/10 bg-[#f2fcf6] p-5">
+                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#16a34a]">
                   Learning outcomes
                 </p>
                 <div className="mt-3 space-y-2">
                   {learningOutcomes.length > 0 ? (
                     learningOutcomes.map((outcome) => (
                       <p key={outcome} className="flex gap-3 text-sm leading-7 text-[#222]">
-                        <span className="mt-2 inline-block h-2 w-2 rounded-full bg-[#8b6cff]" />
+                        <span className="mt-2 inline-block h-2 w-2 rounded-full bg-[#16a34a]" />
                         <span>{outcome}</span>
                       </p>
                     ))
@@ -131,7 +131,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         <section className="mt-12 rounded-[28px] border border-black/10 bg-white p-6 shadow-sm sm:mt-14 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8b6cff]">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#16a34a]">
                 Other courses
               </p>
               <h2 className="mt-2 text-2xl font-bold text-[#0b0b1f]">You may also like</h2>
@@ -153,7 +153,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
               >
                 <img src={item.image} alt={item.title} className="h-36 w-full object-cover" />
                 <div className="p-4">
-                  <p className="text-sm font-semibold text-[#8b6cff]">{normalizeCoursePriceDisplay(item.price)}</p>
+                  <p className="text-sm font-semibold text-[#16a34a]">{normalizeCoursePriceDisplay(item.price)}</p>
                   <p className="mt-1 text-sm font-medium text-[#0b0b1f]">{item.title}</p>
                 </div>
               </Link>
@@ -164,3 +164,4 @@ export default async function CourseDetailPage({ params }: PageProps) {
     </main>
   );
 }
+
