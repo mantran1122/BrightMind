@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Cta from "@/components/shared/CtaSection"
 import Section1Hero from "@/components/courses/sectionHero";
 import Section2 from "@/components/courses/section2";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
     title: "Courses",
