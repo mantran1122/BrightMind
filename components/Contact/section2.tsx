@@ -141,7 +141,7 @@ export default function Section2ContactForm() {
     }
 
     if (fieldName === "name") {
-      nextValue = value.replace(/[^a-zA-ZÃ€-á»¹\s'.-]/g, "");
+      nextValue = value.replace(/[^\p{L}\s'.-]/gu, "");
     }
 
     setValues((currentValues) => ({
