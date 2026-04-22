@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { normalizeCoursePriceDisplay } from "@/lib/currency";
 
 export type CourseCardItem = {
   id: number | string;
@@ -32,7 +33,7 @@ export default function CourseCard({ item }: CourseCardProps) {
       <div className="p-6">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500">{item.lessons} Lessons</span>
-          <span className="text-lg font-bold text-gray-900">{item.price}</span>
+          <span className="text-lg font-bold text-gray-900">{normalizeCoursePriceDisplay(item.price)}</span>
         </div>
 
         <h3 className="mt-4 text-xl font-bold leading-8 text-gray-900">

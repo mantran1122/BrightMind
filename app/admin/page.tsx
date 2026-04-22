@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import {
+  BookOpen,
   FileText,
   LayoutGrid,
   MessageSquareText,
@@ -13,16 +14,23 @@ import {
   Users,
 } from "lucide-react";
 import {
+  createAdminCourse,
   deleteAdminUser,
   fetchAdminDashboard,
+  permanentlyRemoveAdminCourse,
   permanentlyRemoveAdminPost,
   permanentlyRemoveAdminReview,
+  updateAdminCourse,
+  updateAdminCourseTrash,
   updateAdminPostTrash,
   updateAdminReviewTrash,
   updateAdminUserLock,
   updateAdminUserRole,
+  uploadImageFile,
 } from "@/lib/client-api";
 import { type BlogPost, type ReviewPost } from "@/lib/blog-data";
+import { type CourseItem } from "@/lib/courses-data";
+import { formatCoursePriceFromAmount, type CourseCurrency, normalizeCoursePriceDisplay } from "@/lib/currency";
 import { type SessionUser, type StoredUser, type UserRole } from "@/lib/local-auth";
 
 function formatReviewDate(dateString: string) {
@@ -37,12 +45,13 @@ function formatCompactNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-type AdminTab = "users" | "blog" | "reviews" | "trash";
+type AdminTab = "users" | "blog" | "courses" | "reviews" | "trash";
 
 type DashboardData = {
   currentUser: SessionUser;
   users: StoredUser[];
   posts: BlogPost[];
+  courses: CourseItem[];
   reviews: ReviewPost[];
 };
 
@@ -59,6 +68,73 @@ type SummaryCard = {
   tone: "blue" | "emerald" | "amber" | "rose";
 };
 
+type CourseFormValues = {
+  title: string;
+  rating: string;
+  lessons: string;
+  duration: string;
+  students: string;
+  instructor: string;
+  currency: "USD" | "VND" | "EUR";
+  priceAmount: string;
+  image: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  description: string;
+  outcomes: string;
+};
+
+const initialCourseValues: CourseFormValues = {
+  title: "",
+  rating: "",
+  lessons: "",
+  duration: "",
+  students: "",
+  instructor: "",
+  currency: "USD",
+  priceAmount: "",
+  image: "",
+  level: "Beginner",
+  description: "",
+  outcomes: "",
+};
+
+function formatCoursePrice(currency: CourseFormValues["currency"], amount: string) {
+  return formatCoursePriceFromAmount(currency, amount);
+}
+
+function parseCoursePrice(value: string): {
+  currency: CourseFormValues["currency"];
+  priceAmount: string;
+} {
+  const raw = value.trim();
+  const normalizedRaw = raw.toUpperCase();
+
+  if (normalizedRaw.includes("VND") || raw.includes("\u20AB")) {
+    const digitsOnly = raw.replace(/[^\d]/g, "");
+    return { currency: "VND", priceAmount: digitsOnly };
+  }
+
+  if (raw.includes("\u20AC") || normalizedRaw.includes("EUR")) {
+    const cleaned = raw.replace(/[^\d,.-]/g, "");
+    const numeric = Number(
+      cleaned
+        .replace(/\./g, "")
+        .replace(",", "."),
+    );
+    return {
+      currency: "EUR",
+      priceAmount: Number.isFinite(numeric) ? String(numeric) : "",
+    };
+  }
+
+  const cleaned = raw.replace(/[^\d.-]/g, "").replace(/,/g, "");
+  const numeric = Number(cleaned);
+  return {
+    currency: "USD" as CourseCurrency,
+    priceAmount: Number.isFinite(numeric) ? String(numeric) : "",
+  };
+}
+
 const tabConfigs: TabConfig[] = [
   {
     key: "users",
@@ -71,6 +147,12 @@ const tabConfigs: TabConfig[] = [
     label: "Blog",
     description: "Quan ly bai viet hien co",
     icon: FileText,
+  },
+  {
+    key: "courses",
+    label: "Courses",
+    description: "Them, sua va quan ly khoa hoc",
+    icon: BookOpen,
   },
   {
     key: "reviews",
@@ -175,8 +257,16 @@ export default function AdminPage() {
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const [users, setUsers] = useState<StoredUser[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
   const [reviews, setReviews] = useState<ReviewPost[]>([]);
   const [activeTab, setActiveTab] = useState<AdminTab>("users");
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [isCourseFormOpen, setIsCourseFormOpen] = useState(false);
+  const [isCourseImageUploading, setIsCourseImageUploading] = useState(false);
+  const [isCourseSubmitting, setIsCourseSubmitting] = useState(false);
+  const [courseValues, setCourseValues] = useState<CourseFormValues>(initialCourseValues);
+  const [courseMessage, setCourseMessage] = useState("");
+  const courseFormRef = useRef<HTMLFormElement | null>(null);
 
   const refreshData = async () => {
     try {
@@ -184,11 +274,13 @@ export default function AdminPage() {
       setCurrentUser(data.currentUser);
       setUsers(data.users);
       setPosts(data.posts);
+      setCourses(data.courses);
       setReviews(data.reviews);
     } catch {
       setCurrentUser(null);
       setUsers([]);
       setPosts([]);
+      setCourses([]);
       setReviews([]);
     }
   };
@@ -222,6 +314,16 @@ export default function AdminPage() {
       window.removeEventListener("blog-data-changed", syncState);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isCourseFormOpen || activeTab !== "courses") return;
+    const timerId = window.setTimeout(() => {
+      courseFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [isCourseFormOpen, activeTab, editingCourseId]);
 
   const handleChangeRole = async (email: string, role: UserRole) => {
     await updateAdminUserRole(email, role);
@@ -298,8 +400,150 @@ export default function AdminPage() {
     await refreshData();
   };
 
+  const resetCourseForm = () => {
+    setEditingCourseId(null);
+    setIsCourseFormOpen(false);
+    setCourseValues(initialCourseValues);
+    setCourseMessage("");
+  };
+
+  const handleCourseField = <K extends keyof CourseFormValues>(field: K, value: CourseFormValues[K]) => {
+    setCourseValues((current) => ({ ...current, [field]: value }));
+    setCourseMessage("");
+  };
+
+  const handleCourseImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
+    setIsCourseImageUploading(true);
+    setCourseMessage("");
+    try {
+      const uploadedUrl = await uploadImageFile(selectedFile);
+      setCourseValues((current) => ({
+        ...current,
+        image: uploadedUrl,
+      }));
+      setCourseMessage("Course image uploaded successfully.");
+    } catch (error) {
+      setCourseMessage(error instanceof Error ? error.message : "Unable to upload image.");
+    } finally {
+      setIsCourseImageUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleEditCourse = (course: CourseItem) => {
+    const parsedPrice = parseCoursePrice(course.price);
+    setEditingCourseId(course.id);
+    setIsCourseFormOpen(true);
+    setCourseValues({
+      title: course.title,
+      rating: course.rating,
+      lessons: course.lessons,
+      duration: course.duration,
+      students: course.students,
+      instructor: course.instructor,
+      currency: parsedPrice.currency,
+      priceAmount: parsedPrice.priceAmount,
+      image: course.image,
+      level: course.level,
+      description: course.description,
+      outcomes: course.outcomes.join("\n"),
+    });
+    setCourseMessage("");
+    setActiveTab("courses");
+  };
+
+  const handleSubmitCourse = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCourseMessage("");
+
+    const payload = {
+      title: courseValues.title.trim(),
+      rating: courseValues.rating.trim(),
+      lessons: courseValues.lessons.trim(),
+      duration: courseValues.duration.trim(),
+      students: courseValues.students.trim(),
+      instructor: courseValues.instructor.trim(),
+      price: formatCoursePrice(courseValues.currency, courseValues.priceAmount.trim()),
+      image: courseValues.image.trim(),
+      level: courseValues.level,
+      description: courseValues.description.trim(),
+      outcomes: courseValues.outcomes
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+
+    if (
+      !payload.title ||
+      !payload.rating ||
+      !payload.lessons ||
+      !payload.duration ||
+      !payload.students ||
+      !payload.instructor ||
+      !payload.price ||
+      !payload.image ||
+      !payload.description ||
+      payload.outcomes.length < 1
+    ) {
+      setCourseMessage("Please fill all required fields and at least one outcome.");
+      return;
+    }
+
+    setIsCourseSubmitting(true);
+    try {
+      if (editingCourseId) {
+        const updatedCourse = await updateAdminCourse(editingCourseId, payload);
+        if (!updatedCourse) {
+          throw new Error("Course not found or could not be updated.");
+        }
+        setCourseMessage("Course updated successfully.");
+      } else {
+        const createdCourse = await createAdminCourse(payload);
+        if (!createdCourse) {
+          throw new Error("Course could not be created.");
+        }
+        setCourseMessage("Course created successfully.");
+      }
+
+      setEditingCourseId(null);
+      setIsCourseFormOpen(false);
+      setCourseValues(initialCourseValues);
+      await refreshData();
+    } catch (error) {
+      setCourseMessage(error instanceof Error ? error.message : "Unable to save course.");
+    } finally {
+      setIsCourseSubmitting(false);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    const shouldTrash = window.confirm("Ban co chac muon chuyen khoa hoc nay vao thung rac khong?");
+    if (!shouldTrash) return;
+    await updateAdminCourseTrash(courseId, "trash");
+    await refreshData();
+  };
+
+  const handleRestoreCourse = async (courseId: string) => {
+    const shouldRestore = window.confirm("Ban co chac muon khoi phuc khoa hoc nay khong?");
+    if (!shouldRestore) return;
+    await updateAdminCourseTrash(courseId, "restore");
+    await refreshData();
+  };
+
+  const handlePermanentlyDeleteCourse = async (courseId: string) => {
+    const shouldDeleteForever = window.confirm("Khoa hoc se bi xoa vinh vien. Ban co chac khong?");
+    if (!shouldDeleteForever) return;
+    await permanentlyRemoveAdminCourse(courseId);
+    await refreshData();
+  };
+
   const activePosts = posts.filter((post) => !post.isDeleted);
   const trashedPosts = posts.filter((post) => post.isDeleted);
+  const activeCourses = courses.filter((course) => !course.isDeleted);
+  const trashedCourses = courses.filter((course) => course.isDeleted);
   const activeReviews = reviews.filter((review) => !review.isDeleted);
   const trashedReviews = reviews.filter((review) => review.isDeleted);
   const adminUsers = users.filter((item) => item.role === "admin").length;
@@ -318,6 +562,11 @@ export default function AdminPage() {
       { label: "Trong thung rac", value: formatCompactNumber(trashedPosts.length), tone: "amber" },
       { label: "Tong bai viet", value: formatCompactNumber(posts.length), tone: "emerald" },
     ],
+    courses: [
+      { label: "Khoa hoc hien thi", value: formatCompactNumber(activeCourses.length), tone: "blue" },
+      { label: "Trong thung rac", value: formatCompactNumber(trashedCourses.length), tone: "amber" },
+      { label: "Tong khoa hoc", value: formatCompactNumber(courses.length), tone: "emerald" },
+    ],
     reviews: [
       { label: "Review hien thi", value: formatCompactNumber(activeReviews.length), tone: "blue" },
       { label: "Review trong rac", value: formatCompactNumber(trashedReviews.length), tone: "amber" },
@@ -325,10 +574,11 @@ export default function AdminPage() {
     ],
     trash: [
       { label: "Bai viet da xoa", value: formatCompactNumber(trashedPosts.length), tone: "rose" },
+      { label: "Khoa hoc da xoa", value: formatCompactNumber(trashedCourses.length), tone: "amber" },
       { label: "Review da xoa", value: formatCompactNumber(trashedReviews.length), tone: "amber" },
       {
         label: "Tong muc trong rac",
-        value: formatCompactNumber(trashedPosts.length + trashedReviews.length),
+        value: formatCompactNumber(trashedPosts.length + trashedCourses.length + trashedReviews.length),
         tone: "blue",
       },
     ],
@@ -654,6 +904,253 @@ export default function AdminPage() {
               </SectionCard>
             ) : null}
 
+            {activeTab === "courses" ? (
+              <SectionCard
+                title="Course management"
+                description="Them moi, cap nhat, va quan ly khoa hoc hien thi tren trang courses."
+              >
+                <div className="overflow-hidden rounded-[24px] border border-[#2c3a56]">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead className="bg-[#1b263d]">
+                        <tr className="text-left">
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Title</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Instructor</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Level</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Price</th>
+                          <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#6f73ff]">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#2b3952] bg-[#202c44]">
+                        {activeCourses.map((course) => (
+                          <tr key={course.id}>
+                            <td className="px-5 py-4">
+                              <p className="font-semibold text-white">{course.title}</p>
+                              <p className="mt-1 line-clamp-2 text-sm text-slate-400">{course.description}</p>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-slate-300">{course.instructor}</td>
+                            <td className="px-5 py-4 text-sm text-slate-300">{course.level}</td>
+                            <td className="px-5 py-4 text-sm text-slate-300">
+                              {normalizeCoursePriceDisplay(course.price)}
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditCourse(course)}
+                                  className="rounded-xl border border-[#3a4862] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-[#24314a]"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCourse(course.id)}
+                                  className="rounded-xl border border-[#8d6b1a] px-3 py-2 text-sm font-semibold text-[#ffb21e] transition hover:bg-[#3a3122]"
+                                >
+                                  Move to trash
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[#2c3a56] bg-[#1b263d] p-4">
+                  <p className="text-sm text-slate-300">
+                    {courseMessage || "Manage your courses and keep the catalog updated."}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCourseId(null);
+                        setCourseValues(initialCourseValues);
+                        setCourseMessage("");
+                        setIsCourseFormOpen((current) => !current);
+                      }}
+                      className="rounded-xl bg-[#6f73ff] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                    >
+                      {isCourseFormOpen ? "Hide form" : "Add course"}
+                    </button>
+                  </div>
+                </div>
+
+                {isCourseFormOpen ? (
+                  <form
+                    ref={courseFormRef}
+                    onSubmit={handleSubmitCourse}
+                    className="mt-5 grid gap-4 rounded-[22px] border border-[#2c3a56] bg-[#1b263d] p-4 sm:grid-cols-2"
+                  >
+                    <div className="sm:col-span-2">
+                      <p className="text-sm font-semibold text-slate-200">
+                        {editingCourseId ? "Edit course" : "Create new course"}
+                      </p>
+                    </div>
+                    <label className="text-xs text-slate-300">
+                      Title
+                      <input
+                        value={courseValues.title}
+                        onChange={(event) => handleCourseField("title", event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Rating
+                      <input
+                        value={courseValues.rating}
+                        onChange={(event) => handleCourseField("rating", event.target.value)}
+                        placeholder="4.8"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Lessons
+                      <input
+                        value={courseValues.lessons}
+                        onChange={(event) => handleCourseField("lessons", event.target.value)}
+                        placeholder="40 lesson"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Duration
+                      <input
+                        value={courseValues.duration}
+                        onChange={(event) => handleCourseField("duration", event.target.value)}
+                        placeholder="5h 30m"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Students
+                      <input
+                        value={courseValues.students}
+                        onChange={(event) => handleCourseField("students", event.target.value)}
+                        placeholder="500 students"
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Instructor
+                      <input
+                        value={courseValues.instructor}
+                        onChange={(event) => handleCourseField("instructor", event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Currency
+                      <select
+                        value={courseValues.currency}
+                        onChange={(event) =>
+                          handleCourseField(
+                            "currency",
+                            event.target.value as CourseFormValues["currency"],
+                          )
+                        }
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      >
+                        <option value="USD">USD</option>
+                        <option value="VND">VND</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Amount
+                      <input
+                        type="number"
+                        min="0"
+                        step={courseValues.currency === "VND" ? "1" : "0.01"}
+                        value={courseValues.priceAmount}
+                        onChange={(event) => handleCourseField("priceAmount", event.target.value)}
+                        placeholder={courseValues.currency === "VND" ? "1000000" : "39.00"}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300">
+                      Level
+                      <select
+                        value={courseValues.level}
+                        onChange={(event) =>
+                          handleCourseField(
+                            "level",
+                            event.target.value as CourseFormValues["level"],
+                          )
+                        }
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      >
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                      </select>
+                    </label>
+                    <label className="text-xs text-slate-300 sm:col-span-2">
+                      Image (Upload or URL)
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCourseImageUpload}
+                        disabled={isCourseImageUploading}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff] disabled:opacity-60"
+                      />
+                      {isCourseImageUploading ? (
+                        <p className="mt-1 text-xs text-[#6f73ff]">Uploading image...</p>
+                      ) : null}
+                      <input
+                        value={courseValues.image}
+                        onChange={(event) => handleCourseField("image", event.target.value)}
+                        placeholder="https://example.com/image.jpg or /api/uploads/image/{id}"
+                        className="mt-2 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300 sm:col-span-2">
+                      Description
+                      <textarea
+                        rows={3}
+                        value={courseValues.description}
+                        onChange={(event) => handleCourseField("description", event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <label className="text-xs text-slate-300 sm:col-span-2">
+                      Outcomes (one line per item)
+                      <textarea
+                        rows={4}
+                        value={courseValues.outcomes}
+                        onChange={(event) => handleCourseField("outcomes", event.target.value)}
+                        className="mt-1 w-full rounded-xl border border-[#3a4862] bg-[#24314a] px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#6f73ff]"
+                      />
+                    </label>
+                    <div className="sm:col-span-2 flex flex-wrap items-center justify-end gap-2">
+                      {editingCourseId ? (
+                        <button
+                          type="button"
+                          onClick={resetCourseForm}
+                          className="rounded-xl border border-[#3a4862] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-[#24314a]"
+                        >
+                          Cancel edit
+                        </button>
+                      ) : null}
+                      <button
+                        type="submit"
+                        disabled={isCourseImageUploading || isCourseSubmitting}
+                        className="rounded-xl bg-[#6f73ff] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                      >
+                        {isCourseSubmitting
+                          ? "Saving..."
+                          : editingCourseId
+                            ? "Save course"
+                            : "Create course"}
+                      </button>
+                    </div>
+                  </form>
+                ) : null}
+              </SectionCard>
+            ) : null}
+
             {activeTab === "reviews" ? (
               <SectionCard
                 title="Review management"
@@ -724,7 +1221,7 @@ export default function AdminPage() {
             ) : null}
 
             {activeTab === "trash" ? (
-              <div className="grid gap-5 xl:grid-cols-2">
+              <div className="grid gap-5 xl:grid-cols-3">
                 <SectionCard
                   title="Trashed blog posts"
                   description="Khoi phuc bai viet hoac xoa vinh vien."
@@ -764,6 +1261,49 @@ export default function AdminPage() {
                     <EmptyState
                       title="Trash is empty"
                       description="Removed blog posts will be shown here."
+                    />
+                  )}
+                </SectionCard>
+
+                <SectionCard
+                  title="Trashed courses"
+                  description="Khoi phuc khoa hoc hoac xoa vinh vien."
+                >
+                  {trashedCourses.length > 0 ? (
+                    <div className="space-y-3">
+                      {trashedCourses.map((course) => (
+                        <div
+                          key={course.id}
+                          className="rounded-[22px] border border-[#2c3a56] bg-[#263149] p-4"
+                        >
+                          <p className="font-semibold text-white">{course.title}</p>
+                          <p className="mt-1 text-sm text-slate-400">{course.instructor}</p>
+                          <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                            Deleted {course.deletedAt ? formatReviewDate(course.deletedAt) : "N/A"}
+                          </p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreCourse(course.id)}
+                              className="rounded-xl border border-[#1d6f69] px-3 py-2 text-sm font-semibold text-[#18d6a3] transition hover:bg-[#173d42]"
+                            >
+                              Restore
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handlePermanentlyDeleteCourse(course.id)}
+                              className="rounded-xl border border-[#7f3954] px-3 py-2 text-sm font-semibold text-[#ff5b88] transition hover:bg-[#3d2636]"
+                            >
+                              Delete forever
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState
+                      title="No courses in trash"
+                      description="Deleted courses will be listed here."
                     />
                   )}
                 </SectionCard>

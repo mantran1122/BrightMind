@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ensureMysqlSetup, listBlogPosts, listReviews, listUsers } from "@/lib/mysql";
+import { ensureMysqlSetup, listBlogPosts, listCourses, listReviews, listUsers } from "@/lib/mysql";
 import { getCurrentSessionUser } from "@/lib/server-session";
 
 export async function GET() {
@@ -10,11 +10,12 @@ export async function GET() {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
 
-  const [users, posts, reviews] = await Promise.all([
+  const [users, posts, reviews, courses] = await Promise.all([
     listUsers(),
     listBlogPosts({ includeDeleted: true }),
     listReviews({ includeDeleted: true }),
+    listCourses({ includeDeleted: true }),
   ]);
 
-  return NextResponse.json({ currentUser, users, posts, reviews });
+  return NextResponse.json({ currentUser, users, posts, reviews, courses });
 }

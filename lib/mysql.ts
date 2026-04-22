@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import mysql, { type Pool, type RowDataPacket } from "mysql2/promise";
+import mysql, { type Pool, type ResultSetHeader, type RowDataPacket } from "mysql2/promise";
 import { defaultBlogPosts, starterReviews, type BlogPost, type ReviewPost } from "@/lib/blog-data";
+import { courses as starterCourses, type CourseItem } from "@/lib/courses-data";
 import { type SessionUser, type StoredUser, type UserRole } from "@/lib/local-auth";
 import { hashPassword, verifyPassword } from "@/lib/password";
 
@@ -57,6 +58,30 @@ type CreateReviewInput = {
 
 type UpdateReviewInput = CreateReviewInput;
 
+type CreateCourseInput = {
+  title: string;
+  rating: string;
+  lessons: string;
+  duration: string;
+  students: string;
+  instructor: string;
+  price: string;
+  image: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  description: string;
+  outcomes: string[];
+};
+
+type UpdateCourseInput = CreateCourseInput;
+
+type UploadedImageRow = RowDataPacket & {
+  id: string;
+  mime_type: string;
+  original_name: string | null;
+  size_bytes: number;
+  file_data: Buffer;
+};
+
 type UserRow = RowDataPacket & {
   name: string;
   email: string;
@@ -88,6 +113,23 @@ type ReviewRow = RowDataPacket & {
   is_deleted: number;
   deleted_at: Date | null;
   created_at: Date | string;
+};
+
+type CourseRow = RowDataPacket & {
+  id: string;
+  title: string;
+  rating: string;
+  lessons: string;
+  duration: string;
+  students: string;
+  instructor: string;
+  price: string;
+  image_url: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  description: string;
+  outcomes_json: unknown;
+  is_deleted: number;
+  deleted_at: Date | null;
 };
 
 type SessionRow = RowDataPacket & {
@@ -266,6 +308,52 @@ function mapReviewRow(row: ReviewRow): ReviewPost {
   };
 }
 
+function parseCourseOutcomes(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (value && typeof value === "object") {
+    return [];
+  }
+
+  const raw = String(value ?? "").trim();
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item).trim()).filter(Boolean);
+    }
+  } catch {
+    // fallback to plain text parsing below
+  }
+
+  return raw
+    .split(/\r?\n|[;|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function mapCourseRow(row: CourseRow): CourseItem {
+  return {
+    id: row.id,
+    title: row.title,
+    rating: row.rating,
+    lessons: row.lessons,
+    duration: row.duration,
+    students: row.students,
+    instructor: row.instructor,
+    price: row.price,
+    image: row.image_url,
+    level: row.level,
+    description: row.description,
+    outcomes: parseCourseOutcomes(row.outcomes_json),
+    isDeleted: Boolean(row.is_deleted),
+    deletedAt: row.deleted_at ? new Date(row.deleted_at).toISOString() : null,
+  };
+}
+
 export async function ensureMysqlDatabase() {
   const serverPool = getMysqlServerPool();
   const databaseName = getRequiredEnv("MYSQL_DATABASE");
@@ -340,6 +428,33 @@ export async function ensureReviewsTable() {
   `);
 }
 
+export async function ensureCoursesTable() {
+  await ensureMysqlDatabase();
+  const pool = getMysqlPool();
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS courses (
+      id VARCHAR(64) PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      rating VARCHAR(20) NOT NULL,
+      lessons VARCHAR(40) NOT NULL,
+      duration VARCHAR(40) NOT NULL,
+      students VARCHAR(80) NOT NULL,
+      instructor VARCHAR(120) NOT NULL,
+      price VARCHAR(40) NOT NULL,
+      image_url TEXT NOT NULL,
+      level ENUM('Beginner', 'Intermediate', 'Advanced') NOT NULL,
+      description TEXT NOT NULL,
+      outcomes_json JSON NOT NULL,
+      is_deleted TINYINT(1) NOT NULL DEFAULT 0,
+      deleted_at DATETIME NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_courses_deleted (is_deleted)
+    )
+  `);
+}
+
 export async function ensureAuthSessionsTable() {
   await ensureMysqlDatabase();
   const pool = getMysqlPool();
@@ -371,6 +486,24 @@ export async function ensureContactMessagesTable() {
       child_birth_date DATE NOT NULL,
       message TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
+
+export async function ensureUploadedImagesTable() {
+  await ensureMysqlDatabase();
+  const pool = getMysqlPool();
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS uploaded_images (
+      id VARCHAR(64) PRIMARY KEY,
+      mime_type VARCHAR(120) NOT NULL,
+      original_name VARCHAR(255) NULL,
+      size_bytes INT UNSIGNED NOT NULL,
+      file_data LONGBLOB NOT NULL,
+      created_by_email VARCHAR(190) NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_uploaded_images_created_at (created_at)
     )
   `);
 }
@@ -461,10 +594,46 @@ async function seedReviews() {
   }
 }
 
+async function seedCourses() {
+  const pool = getMysqlPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    "SELECT COUNT(*) AS total FROM courses",
+  );
+
+  if (Number(rows[0]?.total ?? 0) > 0) {
+    return;
+  }
+
+  for (const course of starterCourses) {
+    await pool.execute(
+      `
+        INSERT INTO courses
+          (id, title, rating, lessons, duration, students, instructor, price, image_url, level, description, outcomes_json, is_deleted, deleted_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
+      `,
+      [
+        course.id,
+        course.title,
+        course.rating,
+        course.lessons,
+        course.duration,
+        course.students,
+        course.instructor,
+        course.price,
+        course.image,
+        course.level,
+        course.description,
+        JSON.stringify(course.outcomes),
+      ],
+    );
+  }
+}
+
 async function seedInitialData() {
   await seedUsers();
   await seedBlogPosts();
   await seedReviews();
+  await seedCourses();
 }
 
 export async function ensureMysqlSetup() {
@@ -472,8 +641,10 @@ export async function ensureMysqlSetup() {
   await ensureUsersTable();
   await ensureBlogPostsTable();
   await ensureReviewsTable();
+  await ensureCoursesTable();
   await ensureAuthSessionsTable();
   await ensureContactMessagesTable();
+  await ensureUploadedImagesTable();
   await seedInitialData();
 }
 
@@ -894,4 +1065,166 @@ export async function restoreReview(reviewId: string) {
 export async function permanentlyDeleteReview(reviewId: string) {
   const pool = getMysqlPool();
   await pool.execute("DELETE FROM reviews WHERE id = ?", [reviewId]);
+}
+
+export async function saveUploadedImage(input: {
+  mimeType: string;
+  originalName?: string | null;
+  sizeBytes: number;
+  fileData: Buffer;
+  createdByEmail?: string | null;
+}) {
+  await ensureUploadedImagesTable();
+  const pool = getMysqlPool();
+  const id = randomUUID();
+
+  await pool.execute(
+    `
+      INSERT INTO uploaded_images (id, mime_type, original_name, size_bytes, file_data, created_by_email)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [
+      id,
+      input.mimeType.trim(),
+      input.originalName?.trim() || null,
+      input.sizeBytes,
+      input.fileData,
+      input.createdByEmail?.trim().toLowerCase() || null,
+    ],
+  );
+
+  return id;
+}
+
+export async function getUploadedImageById(id: string) {
+  await ensureUploadedImagesTable();
+  const pool = getMysqlPool();
+  const [rows] = await pool.query<UploadedImageRow[]>(
+    `
+      SELECT id, mime_type, original_name, size_bytes, file_data
+      FROM uploaded_images
+      WHERE id = ?
+      LIMIT 1
+    `,
+    [id],
+  );
+
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    mimeType: row.mime_type,
+    originalName: row.original_name,
+    sizeBytes: row.size_bytes,
+    fileData: row.file_data,
+  };
+}
+
+export async function listCourses(options?: { includeDeleted?: boolean }) {
+  const pool = getMysqlPool();
+  const includeDeleted = options?.includeDeleted ?? false;
+  const [rows] = await pool.query<CourseRow[]>(
+    `
+      SELECT id, title, rating, lessons, duration, students, instructor, price, image_url, level, description, outcomes_json, is_deleted, deleted_at
+      FROM courses
+      ${includeDeleted ? "" : "WHERE is_deleted = 0"}
+      ORDER BY created_at DESC, id DESC
+    `,
+  );
+
+  return rows.map(mapCourseRow);
+}
+
+export async function getCourseById(id: string, options?: { includeDeleted?: boolean }) {
+  const pool = getMysqlPool();
+  const includeDeleted = options?.includeDeleted ?? false;
+  const [rows] = await pool.query<CourseRow[]>(
+    `
+      SELECT id, title, rating, lessons, duration, students, instructor, price, image_url, level, description, outcomes_json, is_deleted, deleted_at
+      FROM courses
+      WHERE id = ?
+      ${includeDeleted ? "" : "AND is_deleted = 0"}
+      LIMIT 1
+    `,
+    [id],
+  );
+
+  return rows[0] ? mapCourseRow(rows[0]) : null;
+}
+
+export async function createCourse(input: CreateCourseInput) {
+  const pool = getMysqlPool();
+  const id = randomUUID();
+
+  await pool.execute(
+    `
+      INSERT INTO courses
+        (id, title, rating, lessons, duration, students, instructor, price, image_url, level, description, outcomes_json, is_deleted, deleted_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
+    `,
+    [
+      id,
+      input.title.trim(),
+      input.rating.trim(),
+      input.lessons.trim(),
+      input.duration.trim(),
+      input.students.trim(),
+      input.instructor.trim(),
+      input.price.trim(),
+      input.image.trim(),
+      input.level,
+      input.description.trim(),
+      JSON.stringify(input.outcomes.map((item) => item.trim()).filter(Boolean)),
+    ],
+  );
+
+  return getCourseById(id, { includeDeleted: true });
+}
+
+export async function updateCourse(id: string, input: UpdateCourseInput) {
+  const pool = getMysqlPool();
+
+  const [result] = await pool.execute<ResultSetHeader>(
+    `
+      UPDATE courses
+      SET title = ?, rating = ?, lessons = ?, duration = ?, students = ?, instructor = ?, price = ?, image_url = ?, level = ?, description = ?, outcomes_json = ?
+      WHERE id = ?
+    `,
+    [
+      input.title.trim(),
+      input.rating.trim(),
+      input.lessons.trim(),
+      input.duration.trim(),
+      input.students.trim(),
+      input.instructor.trim(),
+      input.price.trim(),
+      input.image.trim(),
+      input.level,
+      input.description.trim(),
+      JSON.stringify(input.outcomes.map((item) => item.trim()).filter(Boolean)),
+      id,
+    ],
+  );
+
+  if (result.affectedRows < 1) {
+    return null;
+  }
+
+  return getCourseById(id, { includeDeleted: true });
+}
+
+export async function moveCourseToTrash(courseId: string) {
+  const pool = getMysqlPool();
+  await pool.execute("UPDATE courses SET is_deleted = 1, deleted_at = NOW() WHERE id = ?", [courseId]);
+}
+
+export async function restoreCourse(courseId: string) {
+  const pool = getMysqlPool();
+  await pool.execute("UPDATE courses SET is_deleted = 0, deleted_at = NULL WHERE id = ?", [courseId]);
+}
+
+export async function permanentlyDeleteCourse(courseId: string) {
+  const pool = getMysqlPool();
+  await pool.execute("DELETE FROM courses WHERE id = ?", [courseId]);
 }

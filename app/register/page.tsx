@@ -1,18 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { registerWithPassword } from "@/lib/client-api";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getSafeNextPath = () => {
+    const nextPath = searchParams.get("next") ?? "";
+    return nextPath.startsWith("/") ? nextPath : "";
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -22,7 +28,7 @@ export default function RegisterPage() {
     try {
       await registerWithPassword(name, email, password, confirmPassword);
       window.dispatchEvent(new Event("auth-changed"));
-      router.replace("/");
+      router.replace(getSafeNextPath() || "/");
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "Dang ky that bai.");

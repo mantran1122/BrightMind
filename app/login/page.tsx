@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { signInWithPopup } from "firebase/auth";
@@ -10,12 +10,18 @@ import { loginWithGoogleProfile, loginWithPassword } from "@/lib/client-api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const isSubmitting = isPasswordLoading || isGoogleLoading;
+
+  const getSafeNextPath = () => {
+    const nextPath = searchParams.get("next") ?? "";
+    return nextPath.startsWith("/") ? nextPath : "";
+  };
 
   const getGoogleLoginErrorMessage = (errorCode: string) => {
     switch (errorCode) {
@@ -44,7 +50,8 @@ export default function LoginPage() {
     try {
       const user = await loginWithPassword(email, password);
       window.dispatchEvent(new Event("auth-changed"));
-      const targetPath = user.role === "admin" ? "/admin" : "/";
+      const nextPath = getSafeNextPath();
+      const targetPath = nextPath || (user.role === "admin" ? "/admin" : "/");
       router.replace(targetPath);
       router.refresh();
     } catch (error) {
@@ -77,7 +84,8 @@ export default function LoginPage() {
         googleEmail.split("@")[0];
       const user = await loginWithGoogleProfile(name, googleEmail);
       window.dispatchEvent(new Event("auth-changed"));
-      const targetPath = user.role === "admin" ? "/admin" : "/";
+      const nextPath = getSafeNextPath();
+      const targetPath = nextPath || (user.role === "admin" ? "/admin" : "/");
       router.replace(targetPath);
       router.refresh();
     } catch (error: unknown) {

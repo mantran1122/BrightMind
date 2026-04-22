@@ -1,4 +1,5 @@
 import { type BlogPost, type ReviewPost } from "@/lib/blog-data";
+import { type CourseItem } from "@/lib/courses-data";
 import { type SessionUser, type StoredUser, type UserRole } from "@/lib/local-auth";
 
 type JsonResult<T> = Promise<T>;
@@ -154,6 +155,7 @@ export async function fetchAdminDashboard() {
     users: StoredUser[];
     posts: BlogPost[];
     reviews: ReviewPost[];
+    courses: CourseItem[];
   }>("/api/admin/dashboard", { method: "GET" });
 }
 
@@ -207,4 +209,100 @@ export async function permanentlyRemoveAdminReview(reviewId: string) {
     method: "DELETE",
     body: JSON.stringify({ reviewId }),
   });
+}
+
+export async function createAdminCourse(payload: {
+  title: string;
+  rating: string;
+  lessons: string;
+  duration: string;
+  students: string;
+  instructor: string;
+  price: string;
+  image: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  description: string;
+  outcomes: string[];
+}) {
+  const data = await requestJson<{ course: CourseItem }>("/api/admin/courses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return data.course;
+}
+
+export async function updateAdminCourse(
+  courseId: string,
+  payload: {
+    title: string;
+    rating: string;
+    lessons: string;
+    duration: string;
+    students: string;
+    instructor: string;
+    price: string;
+    image: string;
+    level: "Beginner" | "Intermediate" | "Advanced";
+    description: string;
+    outcomes: string[];
+  },
+) {
+  const data = await requestJson<{ course: CourseItem }>("/api/admin/courses", {
+    method: "PATCH",
+    body: JSON.stringify({ courseId, ...payload }),
+  });
+  return data.course;
+}
+
+export async function updateAdminCourseTrash(courseId: string, action: "trash" | "restore") {
+  await requestJson<{ ok: true }>("/api/admin/courses", {
+    method: "PATCH",
+    body: JSON.stringify({ courseId, action }),
+  });
+}
+
+export async function permanentlyRemoveAdminCourse(courseId: string) {
+  await requestJson<{ ok: true }>("/api/admin/courses", {
+    method: "DELETE",
+    body: JSON.stringify({ courseId }),
+  });
+}
+
+export async function enrollInCourse(payload: {
+  courseId: string;
+  courseTitle: string;
+  parentName: string;
+  parentEmail: string;
+  phone: string;
+  childName: string;
+  childBirthDate: string;
+  message: string;
+}) {
+  return requestJson<{ message: string }>("/api/courses/enroll", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function uploadImageFile(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/uploads/image", {
+    method: "POST",
+    credentials: "same-origin",
+    body: formData,
+    cache: "no-store",
+  });
+
+  const data = (await response.json().catch(() => ({}))) as {
+    url?: string;
+    message?: string;
+  };
+
+  if (!response.ok || !data.url) {
+    throw new Error(data.message || "Image upload failed.");
+  }
+
+  return data.url;
 }

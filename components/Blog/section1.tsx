@@ -16,6 +16,7 @@ import {
   fetchBlogPosts,
   fetchSessionUser,
   saveBlogPostChanges,
+  uploadImageFile,
 } from "@/lib/client-api";
 import { type SessionUser } from "@/lib/local-auth";
 
@@ -64,14 +65,15 @@ function validateField(name: keyof BlogFormValues, value: string): string {
       }
       return "";
     case "image":
-      if (!trimmedValue) return "Please enter an image URL.";
+      if (!trimmedValue) return "Please provide a cover image URL or upload an image.";
+      if (trimmedValue.startsWith("/")) return "";
       try {
         const parsedUrl = new URL(trimmedValue);
         if (!["http:", "https:"].includes(parsedUrl.protocol)) {
           return "Image URL must start with http or https.";
         }
       } catch {
-        return "Please enter a valid image URL.";
+        return "Please enter a valid image URL or upload an image.";
       }
       return "";
     default:
@@ -171,6 +173,7 @@ export default function Section2BlogGrid() {
     Partial<Record<keyof BlogFormValues, boolean>>
   >({});
   const [submitMessage, setSubmitMessage] = useState("");
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const formSectionRef = useRef<HTMLElement | null>(null);
 
@@ -258,6 +261,33 @@ export default function Section2BlogGrid() {
       ...currentErrors,
       [fieldName]: validateField(fieldName, value),
     }));
+  };
+
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
+    setSubmitMessage("");
+    setIsImageUploading(true);
+    try {
+      const uploadedUrl = await uploadImageFile(selectedFile);
+      setValues((currentValues) => ({
+        ...currentValues,
+        image: uploadedUrl,
+      }));
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        image: "",
+      }));
+      setSubmitMessage("Image uploaded successfully.");
+    } catch (error) {
+      setSubmitMessage(
+        error instanceof Error ? error.message : "Unable to upload image.",
+      );
+    } finally {
+      setIsImageUploading(false);
+      event.target.value = "";
+    }
   };
 
   const resetFormState = () => {
@@ -435,18 +465,19 @@ export default function Section2BlogGrid() {
 
               <div>
                 <label htmlFor="blog-image" className="text-sm font-medium text-[#0b0b1f]">
-                  Cover Image URL
+                  Cover Image (Upload or URL)
                 </label>
                 <input
-                  id="blog-image"
-                  name="image"
-                  type="url"
-                  value={values.image}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="https://images.unsplash.com/..."
-                  className={getFieldClassName("image")}
+                  id="blog-image-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isImageUploading}
+                  className="mt-2 w-full rounded-[14px] border border-black/10 bg-white px-4 py-2.5 text-sm text-[#0b0b1f] outline-none transition focus:border-[#8b6cff] disabled:opacity-60"
                 />
+                {isImageUploading ? (
+                  <p className="mt-2 text-xs text-[#8b6cff]">Uploading image...</p>
+                ) : null}
                 {errors.image ? (
                   <p className="mt-2 text-sm text-red-600">{errors.image}</p>
                 ) : null}
@@ -506,6 +537,7 @@ export default function Section2BlogGrid() {
 
                 <button
                   type="submit"
+                  disabled={isImageUploading}
                   className="inline-flex items-center justify-center rounded-full bg-[#8b6cff] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
                 >
                   {editingPostId ? "Save Changes" : "Publish Post"}
