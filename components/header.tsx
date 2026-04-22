@@ -68,9 +68,9 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="BrightMind logo"
-              width={420}
-              height={148}
-              className="h-12 w-auto sm:h-14 md:h-20"
+              width={320}
+              height={180}
+              className="h-12 w-auto sm:h-14 md:h-12"
               priority
             />
             <span className="sr-only">BrightMind</span>
